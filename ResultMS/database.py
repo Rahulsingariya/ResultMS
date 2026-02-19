@@ -14,6 +14,17 @@ def init_db():
     conn = get_connection()
     cur = conn.cursor()
 
+    # ── Users table (for login/signup) ──
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            fullname   TEXT NOT NULL,
+            username   TEXT UNIQUE NOT NULL,
+            password   TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     # Students table
     cur.execute("""
         CREATE TABLE IF NOT EXISTS students (
@@ -52,8 +63,7 @@ def init_db():
         )
     """)
 
-    # Seed default subjects — uses INSERT OR IGNORE so safe to re-run on existing DBs.
-    # Add a unique constraint if not present to support INSERT OR IGNORE.
+    # Seed default subjects
     try:
         cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_subject_name_class ON subjects(name, class)")
     except Exception:

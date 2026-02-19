@@ -73,15 +73,20 @@
   <!-- Footer -->
   <div class="sidebar-footer">
     <div class="sidebar-user">
-      <div class="sidebar-avatar">A</div>
+      <div class="sidebar-avatar">{{ session.get('fullname', 'A')[0].upper() }}</div>
       <div class="sidebar-user-info">
-        <div class="sidebar-user-name">Administrator</div>
+        <div class="sidebar-user-name">{{ session.get('fullname', 'Administrator') }}</div>
         <div class="sidebar-user-role">
           <span class="pulse-dot" style="width:6px;height:6px;margin-right:4px"></span>
           Active Session
         </div>
       </div>
     </div>
+    <a href="{{ url_for('logout') }}" class="nav-item mt-2" style="color:#EF4444;"
+       title="Logout">
+      <i class="bi bi-box-arrow-right nav-icon"></i>
+      <span>Logout</span>
+    </a>
   </div>
 
 </aside>
