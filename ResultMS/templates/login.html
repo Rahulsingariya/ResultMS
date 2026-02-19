@@ -4,301 +4,295 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login — ResultMS</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
-
   <style>
-    :root {
-      --primary: #4F46E5;
-      --primary-light: #818CF8;
-      --primary-dark: #3730A3;
-      --bg: #F0F4FF;
-      --surface: #FFFFFF;
-      --gray-400: #94A3B8;
-      --gray-500: #64748B;
-      --gray-700: #334155;
-      --gray-800: #1E293B;
-      --border: #E2E8F0;
-      --shadow-xl: 0 25px 50px -12px rgba(0,0,0,0.15);
-      --shadow-brand: 0 8px 24px rgba(79,70,229,0.25);
-      --font-body: 'Plus Jakarta Sans', sans-serif;
-      --font-display: 'Syne', sans-serif;
-      --radius-lg: 18px;
-      --radius-full: 9999px;
-    }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: var(--font-body);
-      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      background: #f5f7fa;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
-      overflow: hidden;
     }
 
-    /* Animated background blobs */
-    body::before, body::after {
-      content: '';
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.15;
-      animation: float 8s ease-in-out infinite;
-      z-index: 0;
-    }
-    body::before {
-      width: 500px; height: 500px;
-      background: var(--primary);
-      top: -150px; left: -100px;
-    }
-    body::after {
-      width: 400px; height: 400px;
-      background: #8B5CF6;
-      bottom: -100px; right: -80px;
-      animation-delay: -4s;
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-30px) scale(1.05); }
-    }
-
-    .auth-card {
-      position: relative;
-      z-index: 1;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(20px);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-xl);
-      border: 1px solid rgba(255,255,255,0.6);
-      padding: 2.5rem;
+    .page-wrap {
+      display: flex;
       width: 100%;
-      max-width: 420px;
-      margin: 1rem;
-    }
-
-    .auth-logo {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    .auth-logo .logo-icon {
-      font-size: 3rem;
-      display: block;
-      margin-bottom: 0.5rem;
-    }
-    .auth-logo .logo-title {
-      font-family: var(--font-display);
-      font-size: 1.75rem;
-      font-weight: 800;
-      color: var(--gray-800);
-    }
-    .auth-logo .logo-title span { color: var(--primary); }
-    .auth-logo .logo-sub {
-      font-size: 0.85rem;
-      color: var(--gray-500);
-      margin-top: 0.25rem;
-    }
-
-    .auth-heading {
-      font-family: var(--font-display);
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: var(--gray-800);
-      margin-bottom: 0.4rem;
-    }
-    .auth-subheading {
-      font-size: 0.875rem;
-      color: var(--gray-500);
-      margin-bottom: 1.75rem;
-    }
-
-    .form-label {
-      font-size: 0.825rem;
-      font-weight: 600;
-      color: var(--gray-700);
-      margin-bottom: 0.4rem;
-    }
-
-    .input-group-custom {
-      position: relative;
-      margin-bottom: 1.1rem;
-    }
-    .input-group-custom .input-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--gray-400);
-      font-size: 1rem;
-      z-index: 2;
-    }
-    .input-group-custom input {
-      width: 100%;
-      padding: 0.7rem 1rem 0.7rem 2.5rem;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-family: var(--font-body);
-      font-size: 0.9rem;
-      color: var(--gray-800);
+      max-width: 900px;
+      min-height: 520px;
       background: #fff;
-      transition: all 0.2s;
-      outline: none;
+      border-radius: 16px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+      overflow: hidden;
+      margin: 24px;
     }
-    .input-group-custom input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
-    }
-    .input-group-custom .toggle-pw {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--gray-400);
-      cursor: pointer;
-      font-size: 1rem;
-      z-index: 2;
-      background: none;
-      border: none;
-      padding: 0;
-    }
-    .input-group-custom .toggle-pw:hover { color: var(--primary); }
 
-    .btn-auth {
-      width: 100%;
-      padding: 0.75rem;
-      background: linear-gradient(135deg, var(--primary), #7C3AED);
+    /* Left panel */
+    .left-panel {
+      flex: 1;
+      background: linear-gradient(145deg, #1e3a5f, #2d6a9f);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 36px;
       color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-family: var(--font-body);
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.25s;
-      box-shadow: var(--shadow-brand);
-      margin-top: 0.5rem;
     }
-    .btn-auth:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 12px 30px rgba(79,70,229,0.35);
+    .left-panel .brand-icon {
+      font-size: 52px;
+      margin-bottom: 20px;
     }
-    .btn-auth:active { transform: translateY(0); }
-
-    .auth-divider {
+    .left-panel h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+    .left-panel h1 span { color: #7dd3fc; }
+    .left-panel p {
+      font-size: 14px;
+      opacity: 0.75;
+      text-align: center;
+      line-height: 1.6;
+      max-width: 220px;
+    }
+    .left-panel .features {
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+    .left-panel .feature-item {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      margin: 1.5rem 0;
-      color: var(--gray-400);
-      font-size: 0.8rem;
+      gap: 10px;
+      font-size: 13px;
+      opacity: 0.85;
     }
-    .auth-divider::before, .auth-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
+    .left-panel .feature-item i {
+      background: rgba(255,255,255,0.15);
+      border-radius: 6px;
+      padding: 5px;
+      font-size: 14px;
     }
 
-    .auth-switch {
-      text-align: center;
-      font-size: 0.875rem;
-      color: var(--gray-500);
+    /* Right panel */
+    .right-panel {
+      flex: 1;
+      padding: 48px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
-    .auth-switch a {
-      color: var(--primary);
+    .right-panel h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 6px;
+    }
+    .right-panel .subtitle {
+      font-size: 13.5px;
+      color: #6b7280;
+      margin-bottom: 28px;
+    }
+
+    /* Flash */
+    .alert {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .alert-error   { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .alert-success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+
+    /* Form */
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+    .input-wrap {
+      position: relative;
+    }
+    .input-wrap i.icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      font-size: 15px;
+    }
+    .input-wrap input {
+      width: 100%;
+      padding: 10px 12px 10px 36px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #111827;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-wrap input:focus {
+      border-color: #2d6a9f;
+      box-shadow: 0 0 0 3px rgba(45,106,159,0.10);
+    }
+    .input-wrap .toggle-pw {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #9ca3af;
+      cursor: pointer;
+      font-size: 15px;
+      padding: 0;
+    }
+    .input-wrap .toggle-pw:hover { color: #2d6a9f; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 11px;
+      background: #1e3a5f;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 6px;
+    }
+    .btn-primary:hover  { background: #2d6a9f; }
+    .btn-primary:active { transform: scale(0.99); }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 20px 0;
+      color: #d1d5db;
+      font-size: 12px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: #e5e7eb;
+    }
+
+    .switch-text {
+      text-align: center;
+      font-size: 13.5px;
+      color: #6b7280;
+    }
+    .switch-text a {
+      color: #2d6a9f;
       font-weight: 600;
       text-decoration: none;
     }
-    .auth-switch a:hover { text-decoration: underline; }
+    .switch-text a:hover { text-decoration: underline; }
 
-    /* Flash messages */
-    .flash-auth {
-      padding: 0.7rem 1rem;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    @media (max-width: 640px) {
+      .left-panel { display: none; }
+      .right-panel { padding: 36px 24px; }
     }
-    .flash-auth.error { background: #FEE2E2; color: #DC2626; border: 1px solid #FECACA; }
-    .flash-auth.success { background: #D1FAE5; color: #059669; border: 1px solid #A7F3D0; }
   </style>
 </head>
 <body>
 
-<div class="auth-card">
-  <!-- Logo -->
-  <div class="auth-logo">
-    <span class="logo-icon">🎓</span>
-    <div class="logo-title">Result<span>MS</span></div>
-    <div class="logo-sub">Result Management System</div>
+<div class="page-wrap">
+
+  <!-- Left Panel -->
+  <div class="left-panel">
+    <div class="brand-icon">🎓</div>
+    <h1>Result<span>MS</span></h1>
+    <p>A complete result management system for schools and institutions.</p>
+    <div class="features">
+      <div class="feature-item">
+        <i class="bi bi-people-fill"></i> Manage Students & Classes
+      </div>
+      <div class="feature-item">
+        <i class="bi bi-clipboard2-data-fill"></i> Enter & Track Results
+      </div>
+      <div class="feature-item">
+        <i class="bi bi-file-earmark-text-fill"></i> Generate Marksheets
+      </div>
+      <div class="feature-item">
+        <i class="bi bi-bar-chart-fill"></i> View Analytics
+      </div>
+    </div>
   </div>
 
-  <!-- Flash Messages -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for cat, msg in messages %}
-        <div class="flash-auth {{ cat }}">
-          {% if cat == 'error' %}<i class="bi bi-exclamation-circle-fill"></i>
-          {% else %}<i class="bi bi-check-circle-fill"></i>{% endif %}
-          {{ msg }}
+  <!-- Right Panel -->
+  <div class="right-panel">
+    <h2>Sign in to your account</h2>
+    <p class="subtitle">Enter your credentials to access the dashboard</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div class="alert alert-{{ cat }}">
+            {% if cat == 'error' %}<i class="bi bi-exclamation-circle-fill"></i>
+            {% else %}<i class="bi bi-check-circle-fill"></i>{% endif %}
+            {{ msg }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('login') }}">
+      <div class="form-group">
+        <label>Username</label>
+        <div class="input-wrap">
+          <i class="bi bi-person icon"></i>
+          <input type="text" name="username" placeholder="Enter your username" required autocomplete="username"/>
         </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
+      </div>
 
-  <div class="auth-heading">Welcome back 👋</div>
-  <div class="auth-subheading">Sign in to your admin account</div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <i class="bi bi-lock icon"></i>
+          <input type="password" name="password" id="loginPw" placeholder="Enter your password" required autocomplete="current-password"/>
+          <button type="button" class="toggle-pw" onclick="togglePw('loginPw',this)">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+      </div>
 
-  <form method="POST" action="{{ url_for('login') }}">
-    <!-- Username -->
-    <label class="form-label">Username</label>
-    <div class="input-group-custom">
-      <i class="bi bi-person-fill input-icon"></i>
-      <input type="text" name="username" placeholder="Enter username" required autocomplete="username"/>
-    </div>
-
-    <!-- Password -->
-    <label class="form-label">Password</label>
-    <div class="input-group-custom">
-      <i class="bi bi-lock-fill input-icon"></i>
-      <input type="password" name="password" id="loginPw" placeholder="Enter password" required autocomplete="current-password"/>
-      <button type="button" class="toggle-pw" onclick="togglePw('loginPw', this)">
-        <i class="bi bi-eye"></i>
+      <button type="submit" class="btn-primary">
+        Sign In &nbsp;→
       </button>
+    </form>
+
+    <div class="divider">or</div>
+
+    <div class="switch-text">
+      Don't have an account? <a href="{{ url_for('signup') }}">Create one</a>
     </div>
-
-    <button type="submit" class="btn-auth">
-      <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
-    </button>
-  </form>
-
-  <div class="auth-divider">or</div>
-
-  <div class="auth-switch">
-    Don't have an account? <a href="{{ url_for('signup') }}">Create one</a>
   </div>
+
 </div>
 
 <script>
   function togglePw(id, btn) {
-    const input = document.getElementById(id);
+    const inp  = document.getElementById(id);
     const icon = btn.querySelector('i');
-    if (input.type === 'password') {
-      input.type = 'text';
-      icon.className = 'bi bi-eye-slash';
-    } else {
-      input.type = 'password';
-      icon.className = 'bi bi-eye';
-    }
+    if (inp.type === 'password') { inp.type = 'text'; icon.className = 'bi bi-eye-slash'; }
+    else { inp.type = 'password'; icon.className = 'bi bi-eye'; }
   }
 </script>
 </body>

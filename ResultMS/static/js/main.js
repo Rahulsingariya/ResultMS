@@ -514,3 +514,22 @@ $(function () {
 
 });
 /* End of ResultMS premium JS */
+/* ══════════════════════════════════════
+   FIX — Mobile sidebar with overlay
+══════════════════════════════════════ */
+$(function () {
+  // Add overlay div to body if not present
+  if (!$('#sidebarOverlay').length) {
+    $('body').append('<div id="sidebarOverlay" class="sidebar-overlay"></div>');
+  }
+
+  $('#menuToggle').off('click').on('click', function () {
+    $('#sidebar').toggleClass('open');
+    $('#sidebarOverlay').toggleClass('active');
+  });
+
+  $('#sidebarOverlay').on('click', function () {
+    $('#sidebar').removeClass('open');
+    $('#sidebarOverlay').removeClass('active');
+  });
+});

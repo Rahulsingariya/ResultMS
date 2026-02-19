@@ -5,12 +5,8 @@ from database import get_connection
 from helpers import calculate_grade, get_result_summary, get_grade_color
 
 
-# ─────────────────────────────────────────────
-# HELPERS
-# ─────────────────────────────────────────────
-
 def hash_password(pw):
-    return hashlib.sha256(pw.encode()).hexdigest()
+    return hashlib.sha256(pw.encode("utf-8")).hexdigest()
 
 
 def login_required(f):
@@ -26,7 +22,7 @@ def login_required(f):
 def register_routes(app):
 
     # ─────────────────────────────────────────────
-    # AUTH — Login / Signup / Logout
+    # AUTH
     # ─────────────────────────────────────────────
 
     @app.route("/login", methods=["GET", "POST"])
@@ -35,12 +31,12 @@ def register_routes(app):
             return redirect(url_for("dashboard"))
 
         if request.method == "POST":
-            username = request.form["username"].strip()
-            password = request.form["password"].strip()
+            username = request.form.get("username", "").strip()
+            password = request.form.get("password", "").strip()
 
             if not username or not password:
                 flash("Username and password are required.", "error")
-                return redirect(url_for("login"))
+                return render_template("login.html")
 
             conn = get_connection()
             user = conn.execute(
@@ -48,15 +44,19 @@ def register_routes(app):
             ).fetchone()
             conn.close()
 
-            if user and user["password"] == hash_password(password):
+            if user is None:
+                flash("No account found with that username.", "error")
+                return render_template("login.html")
+
+            if user["password"] == hash_password(password):
                 session["user_id"]  = user["id"]
                 session["username"] = user["username"]
                 session["fullname"] = user["fullname"]
-                flash(f"Welcome back, {user['fullname']}! 👋", "success")
+                flash(f"Welcome back, {user['fullname']}!", "success")
                 return redirect(url_for("dashboard"))
             else:
-                flash("Invalid username or password.", "error")
-                return redirect(url_for("login"))
+                flash("Incorrect password. Please try again.", "error")
+                return render_template("login.html")
 
         return render_template("login.html")
 
@@ -66,24 +66,33 @@ def register_routes(app):
             return redirect(url_for("dashboard"))
 
         if request.method == "POST":
-            fullname         = request.form["fullname"].strip()
-            username         = request.form["username"].strip()
-            password         = request.form["password"].strip()
-            confirm_password = request.form["confirm_password"].strip()
+            fullname         = request.form.get("fullname", "").strip()
+            username         = request.form.get("username", "").strip()
+            password         = request.form.get("password", "").strip()
+            confirm_password = request.form.get("confirm_password", "").strip()
 
             if not all([fullname, username, password, confirm_password]):
                 flash("All fields are required.", "error")
-                return redirect(url_for("signup"))
+                return render_template("signup.html")
 
             if len(password) < 6:
                 flash("Password must be at least 6 characters.", "error")
-                return redirect(url_for("signup"))
+                return render_template("signup.html")
 
             if password != confirm_password:
                 flash("Passwords do not match.", "error")
-                return redirect(url_for("signup"))
+                return render_template("signup.html")
 
             conn = get_connection()
+            existing = conn.execute(
+                "SELECT id FROM users WHERE username = ?", (username,)
+            ).fetchone()
+
+            if existing:
+                conn.close()
+                flash("Username already taken. Please choose another.", "error")
+                return render_template("signup.html")
+
             try:
                 conn.execute(
                     "INSERT INTO users (fullname, username, password) VALUES (?,?,?)",
@@ -92,9 +101,9 @@ def register_routes(app):
                 conn.commit()
                 flash("Account created successfully! Please login.", "success")
                 return redirect(url_for("login"))
-            except Exception:
-                flash("Username already taken. Please choose another.", "error")
-                return redirect(url_for("signup"))
+            except Exception as e:
+                flash(f"Error: {e}", "error")
+                return render_template("signup.html")
             finally:
                 conn.close()
 
@@ -103,7 +112,7 @@ def register_routes(app):
     @app.route("/logout")
     def logout():
         session.clear()
-        flash("You have been logged out.", "success")
+        flash("You have been logged out successfully.", "success")
         return redirect(url_for("login"))
 
     # ─────────────────────────────────────────────
@@ -141,9 +150,9 @@ def register_routes(app):
             ORDER BY r.created_at DESC LIMIT 8
         """).fetchall()
 
-        classes = cur.execute("""
-            SELECT class, COUNT(*) as cnt FROM students GROUP BY class
-        """).fetchall()
+        classes = cur.execute(
+            "SELECT class, COUNT(*) as cnt FROM students GROUP BY class"
+        ).fetchall()
 
         conn.close()
         return render_template("dashboard.html", stats=stats, recent=recent, classes=classes)
@@ -154,11 +163,11 @@ def register_routes(app):
     @app.route("/students")
     @login_required
     def students():
-        conn = get_connection()
+        conn  = get_connection()
         query = request.args.get("q", "").strip()
         cls   = request.args.get("class", "").strip()
 
-        sql  = "SELECT * FROM students WHERE 1=1"
+        sql    = "SELECT * FROM students WHERE 1=1"
         params = []
         if query:
             sql += " AND (name LIKE ? OR roll_no LIKE ?)"
@@ -273,9 +282,9 @@ def register_routes(app):
             except Exception as e:
                 conn.rollback()
                 if "UNIQUE constraint" in str(e):
-                    flash('"' + name + '" already exists in ' + cls + '. Try a different name or class.', "error")
+                    flash('"' + name + '" already exists in ' + cls + '.', "error")
                 else:
-                    flash("Error adding subject: " + str(e), "error")
+                    flash("Error: " + str(e), "error")
                 return redirect(url_for("add_subject"))
             finally:
                 conn.close()
@@ -339,15 +348,15 @@ def register_routes(app):
                     "subjects":     []
                 }
             grouped[key]["subjects"].append({
-                "id":          r["id"],
-                "subject_name":r["subject_name"],
-                "marks":       r["marks"],
-                "max_marks":   r["max_marks"],
-                "grade":       r["grade"]
+                "id":           r["id"],
+                "subject_name": r["subject_name"],
+                "marks":        r["marks"],
+                "max_marks":    r["max_marks"],
+                "grade":        r["grade"]
             })
 
         for key, grp in grouped.items():
-            subs = grp["subjects"]
+            subs      = grp["subjects"]
             total     = sum(s["marks"]     for s in subs)
             total_max = sum(s["max_marks"] for s in subs)
             pct       = round(total / total_max * 100, 1) if total_max else 0
