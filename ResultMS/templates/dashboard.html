@@ -1,0 +1,707 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════ -->
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+  <div>
+    <h2 class="dash-welcome-title">Welcome back, <span>Admin</span> 👋</h2>
+    <p class="dash-welcome-sub">Here's what's happening with your students today.</p>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{{ url_for('add_student') }}" class="btn btn-ghost btn-sm">
+      <i class="bi bi-person-plus-fill"></i> Add Student
+    </a>
+    <a href="{{ url_for('add_result') }}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-circle-fill"></i> Enter Result
+    </a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     STAT CARDS
+═══════════════════════════════════════ -->
+<div class="stats-grid stagger-children mb-4">
+
+  <!-- Total Students -->
+  <div class="stat-card blue">
+    <div class="stat-icon-wrap">
+      <i class="bi bi-people-fill" style="color:#3B82F6;font-size:22px"></i>
+    </div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.total_students }}</div>
+      <div class="stat-label">Total Students</div>
+      <div class="stat-trend up">
+        <i class="bi bi-arrow-up-short"></i> Enrolled
+      </div>
+    </div>
+    <div class="stat-card-bg-icon">
+      <i class="bi bi-people-fill"></i>
+    </div>
+  </div>
+
+  <!-- Subjects -->
+  <div class="stat-card green">
+    <div class="stat-icon-wrap">
+      <i class="bi bi-journal-bookmark-fill" style="color:#10B981;font-size:22px"></i>
+    </div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.total_subjects }}</div>
+      <div class="stat-label">Total Subjects</div>
+      <div class="stat-trend up">
+        <i class="bi bi-arrow-up-short"></i> All classes
+      </div>
+    </div>
+    <div class="stat-card-bg-icon">
+      <i class="bi bi-journal-bookmark-fill"></i>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="stat-card amber">
+    <div class="stat-icon-wrap">
+      <i class="bi bi-clipboard2-data-fill" style="color:#F59E0B;font-size:22px"></i>
+    </div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.total_results }}</div>
+      <div class="stat-label">Results Entered</div>
+      <div class="stat-trend up">
+        <i class="bi bi-arrow-up-short"></i> Records
+      </div>
+    </div>
+    <div class="stat-card-bg-icon">
+      <i class="bi bi-clipboard2-data-fill"></i>
+    </div>
+  </div>
+
+  <!-- Passed -->
+  <div class="stat-card purple">
+    <div class="stat-icon-wrap">
+      <i class="bi bi-patch-check-fill" style="color:#8B5CF6;font-size:22px"></i>
+    </div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.pass_count }}</div>
+      <div class="stat-label">Students Passed</div>
+      <div class="stat-trend up">
+        <i class="bi bi-arrow-up-short"></i>
+        {% if stats.total_students > 0 %}
+          {{ ((stats.pass_count / stats.total_students) * 100) | round(1) }}% rate
+        {% else %}—{% endif %}
+      </div>
+    </div>
+    <div class="stat-card-bg-icon">
+      <i class="bi bi-patch-check-fill"></i>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     MAIN GRID — RECENT RESULTS + SIDEBAR
+═══════════════════════════════════════ -->
+<div class="dash-grid">
+
+  <!-- ── LEFT: Recent Results ── -->
+  <div class="card fade-in">
+    <div class="card-header">
+      <div class="d-flex align-items-center gap-2">
+        <div class="card-header-icon" style="background:#EEF2FF">
+          <i class="bi bi-clock-history" style="color:#6366F1"></i>
+        </div>
+        <h3>Recent Results</h3>
+        <span class="badge badge-blue ms-1">Latest 8</span>
+      </div>
+      <a href="{{ url_for('results') }}" class="link-sm">
+        View all <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table" id="recentTable">
+        <thead>
+          <tr>
+            <th><i class="bi bi-person me-1"></i>Student</th>
+            <th>Roll No</th>
+            <th><i class="bi bi-journal me-1"></i>Subject</th>
+            <th>Marks</th>
+            <th>Grade</th>
+            <th><i class="bi bi-mortarboard me-1"></i>Exam</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in recent %}
+          {% set pct = (r.marks / r.max_marks * 100) | round(0) | int %}
+          <!-- FIX line 138: removed animation-delay from style attr; now set via JS using data-index -->
+          <tr class="fade-in stagger-row" data-index="{{ loop.index0 }}">
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="mini-avatar">{{ r.name[0] }}</div>
+                <strong>{{ r.name }}</strong>
+              </div>
+            </td>
+            <td><span class="badge badge-blue">{{ r.roll_no }}</span></td>
+            <td>
+              <span class="subject-tag">{{ r.subject }}</span>
+            </td>
+            <td>
+              <div class="marks-display">
+                <span class="marks-val">{{ r.marks }}</span>
+                <span class="marks-sep">/</span>
+                <span class="marks-max">{{ r.max_marks }}</span>
+              </div>
+              <div class="marks-mini-bar">
+                <div class="marks-mini-fill
+                  {% if pct >= 80 %}marks-fill-excellent
+                  {% elif pct >= 60 %}marks-fill-good
+                  {% elif pct >= 33 %}marks-fill-average
+                  {% else %}marks-fill-poor{% endif %}"
+                  data-width="{{ pct }}">
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="grade-pill {{ r.grade | lower | replace('+','plus') }}">
+                {{ r.grade }}
+              </span>
+            </td>
+            <td>
+              <span class="exam-tag">{{ r.exam_type }}</span>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="empty-msg">
+              <span class="empty-icon">📋</span>
+              <div class="empty-title">No results yet</div>
+              <div class="empty-sub">Start by entering student marks</div>
+              <a href="{{ url_for('add_result') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle"></i> Enter First Result
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if recent %}
+    <div class="table-footer">
+      <i class="bi bi-info-circle me-1"></i>
+      Showing {{ recent|length }} most recent result entries
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── RIGHT: Stats Sidebar ── -->
+  <div class="d-flex flex-column gap-3">
+
+    <!-- Class Distribution -->
+    <div class="card fade-in">
+      <div class="card-header">
+        <div class="d-flex align-items-center gap-2">
+          <div class="card-header-icon" style="background:#FEF3C7">
+            <i class="bi bi-bar-chart-fill" style="color:#F59E0B"></i>
+          </div>
+          <h3>Class Distribution</h3>
+        </div>
+        <a href="{{ url_for('students') }}" class="link-sm">
+          Manage <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+
+      <div class="class-dist">
+        {% if classes %}
+          {% for cls in classes %}
+          <div class="dist-row">
+            <span class="dist-label">{{ cls.class }}</span>
+            <div class="dist-bar-wrap">
+              <div class="dist-bar"
+                   data-width="{{ (cls.cnt / stats.total_students * 100) if stats.total_students else 0 }}">
+              </div>
+            </div>
+            <span class="dist-count">{{ cls.cnt }}</span>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-msg py-3">
+            <span class="empty-icon" style="font-size:28px">🏫</span>
+            <div class="empty-sub">No students added yet</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Pass/Fail Donut -->
+    {% if stats.total_students > 0 %}
+    <div class="card fade-in">
+      <div class="card-header">
+        <div class="d-flex align-items-center gap-2">
+          <div class="card-header-icon" style="background:#D1FAE5">
+            <i class="bi bi-pie-chart-fill" style="color:#059669"></i>
+          </div>
+          <h3>Pass Rate</h3>
+        </div>
+      </div>
+      <div class="pass-rate-wrap">
+        <div class="pass-rate-donut">
+          <svg viewBox="0 0 100 100" class="donut-svg">
+            <circle cx="50" cy="50" r="38"
+                    fill="none" stroke="#FEE2E2" stroke-width="12"/>
+            <circle cx="50" cy="50" r="38"
+                    fill="none" stroke="url(#passGrad)" stroke-width="12"
+                    stroke-linecap="round"
+                    data-dash="{{ ((stats.pass_count / stats.total_students) * 238.76) | round(1) }}"
+                    stroke-dasharray="0 238.76"
+                    stroke-dashoffset="59.69"
+                    class="donut-progress"/>
+            <defs>
+              <linearGradient id="passGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#059669"/>
+                <stop offset="100%" style="stop-color:#10B981"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="donut-center">
+            <div class="donut-pct">
+              {% if stats.total_students > 0 %}
+                {{ ((stats.pass_count / stats.total_students) * 100) | round(0) | int }}%
+              {% else %}0%{% endif %}
+            </div>
+            <div class="donut-lbl">Pass Rate</div>
+          </div>
+        </div>
+        <div class="pass-rate-legend">
+          <div class="legend-item">
+            <span class="legend-dot" style="background:#10B981"></span>
+            <span class="legend-label">Passed</span>
+            <span class="legend-val">{{ stats.pass_count }}</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot" style="background:#EF4444"></span>
+            <span class="legend-label">Failed / Pending</span>
+            <span class="legend-val">{{ stats.total_students - stats.pass_count }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="card fade-in">
+      <div class="card-header">
+        <div class="d-flex align-items-center gap-2">
+          <div class="card-header-icon" style="background:#EDE9FE">
+            <i class="bi bi-lightning-fill" style="color:#7C3AED"></i>
+          </div>
+          <h3>Quick Actions</h3>
+        </div>
+      </div>
+      <div class="quick-actions">
+        <div class="qa-grid">
+          <a href="{{ url_for('add_student') }}" class="qa-btn">
+            <i class="bi bi-person-plus-fill qa-icon"></i>
+            <span>Add Student</span>
+          </a>
+          <a href="{{ url_for('add_subject') }}" class="qa-btn">
+            <i class="bi bi-journal-plus qa-icon"></i>
+            <span>Add Subject</span>
+          </a>
+          <a href="{{ url_for('add_result') }}" class="qa-btn">
+            <i class="bi bi-clipboard2-plus qa-icon"></i>
+            <span>Enter Result</span>
+          </a>
+          <a href="{{ url_for('marksheet') }}" class="qa-btn">
+            <i class="bi bi-file-earmark-text qa-icon"></i>
+            <span>Marksheet</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Info -->
+    <div class="card fade-in sys-info-card">
+      <div class="sys-info-header">
+        <i class="bi bi-shield-fill-check sys-info-icon"></i>
+        <div>
+          <div class="sys-info-title">System Status</div>
+          <div class="sys-info-sub">All services running</div>
+        </div>
+        <span class="sys-status-dot"></span>
+      </div>
+      <div class="sys-info-rows">
+        <div class="sys-info-row">
+          <span><i class="bi bi-database me-2" style="color:#6366F1"></i>Database</span>
+          <span class="sys-ok"><i class="bi bi-check-circle-fill me-1"></i>SQLite Active</span>
+        </div>
+        <div class="sys-info-row">
+          <span><i class="bi bi-code-slash me-2" style="color:#6366F1"></i>Framework</span>
+          <span class="sys-ok"><i class="bi bi-check-circle-fill me-1"></i>Flask v3.0</span>
+        </div>
+        <div class="sys-info-row">
+          <span><i class="bi bi-calendar3 me-2" style="color:#6366F1"></i>Version</span>
+          <span class="sys-ok">v2.0 Premium</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end right col -->
+</div><!-- end dash-grid -->
+
+
+<!-- ═══════════════════════════════════════
+     BOTTOM ROW — Grade Summary
+═══════════════════════════════════════ -->
+{% if recent %}
+<div class="card mt-4 fade-in">
+  <div class="card-header">
+    <div class="d-flex align-items-center gap-2">
+      <div class="card-header-icon" style="background:#FEF3C7">
+        <i class="bi bi-award-fill" style="color:#F59E0B"></i>
+      </div>
+      <h3>Grade Overview</h3>
+    </div>
+    <a href="{{ url_for('results') }}" class="link-sm">Full report <i class="bi bi-arrow-right"></i></a>
+  </div>
+  <div class="grade-overview-wrap">
+    {% set grades = [('A+','aplus','grade-color-aplus'),
+                     ('A', 'a',    'grade-color-a'),
+                     ('B+','bplus','grade-color-bplus'),
+                     ('B', 'b',    'grade-color-b'),
+                     ('C+','cplus','grade-color-cplus'),
+                     ('C', 'c',    'grade-color-c'),
+                     ('D', 'd',    'grade-color-d'),
+                     ('F', 'f',    'grade-color-f')] %}
+    {% for gname, gcls, gcolorclass in grades %}
+    {% set count = recent | selectattr('grade','equalto', gname) | list | length %}
+    <div class="grade-overview-item">
+      <span class="grade-pill {{ gcls }} grade-lg">{{ gname }}</span>
+      <div class="grade-bar-wrap">
+        <div class="grade-bar {{ gcolorclass }}"
+             data-height="{{ [count * 24, 4] | max }}">
+        </div>
+      </div>
+      <span class="grade-bar-count">{{ count }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+
+<!-- ═══════════════════════════════════════
+     DASHBOARD PAGE STYLES
+═══════════════════════════════════════ -->
+<style>
+/* Welcome header */
+.dash-welcome-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--gray-900);
+  letter-spacing: -0.4px;
+  margin: 0;
+}
+.dash-welcome-title span { color: var(--brand-600); }
+.dash-welcome-sub {
+  font-size: 13.5px;
+  color: var(--gray-500);
+  margin: 3px 0 0;
+  font-weight: 400;
+}
+
+/* Stat card bg icon */
+.stat-card { position: relative; overflow: hidden; }
+.stat-card-bg-icon {
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 72px;
+  opacity: 0.06;
+  pointer-events: none;
+  line-height: 1;
+  transition: var(--transition);
+}
+.stat-card:hover .stat-card-bg-icon { opacity: 0.1; transform: translateY(-50%) scale(1.1); }
+
+/* Mini avatar in table */
+.mini-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--brand-500), #7C3AED);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Subject tag */
+.subject-tag {
+  background: var(--brand-50);
+  color: var(--brand-700);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Exam tag */
+.exam-tag {
+  background: var(--gray-100);
+  color: var(--gray-600);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Marks display */
+.marks-display { display: flex; align-items: baseline; gap: 1px; margin-bottom: 3px; }
+.marks-val { font-size: 14px; font-weight: 700; color: var(--gray-800); }
+.marks-sep { font-size: 11px; color: var(--gray-400); }
+.marks-max { font-size: 11px; color: var(--gray-400); }
+
+.marks-mini-bar {
+  width: 60px;
+  height: 4px;
+  background: var(--gray-100);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.marks-mini-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 1s ease;
+  width: 0;
+}
+
+/* Color classes for marks bar */
+.marks-fill-excellent { background: #10B981; }
+.marks-fill-good      { background: #3B82F6; }
+.marks-fill-average   { background: #F59E0B; }
+.marks-fill-poor      { background: #EF4444; }
+
+/* Pass rate donut */
+.pass-rate-wrap {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.pass-rate-donut {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+}
+.donut-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.donut-progress {
+  transition: stroke-dasharray 1.5s cubic-bezier(0.4,0,0.2,1);
+}
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.donut-pct {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--gray-900);
+  line-height: 1;
+}
+.donut-lbl {
+  font-size: 9px;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.pass-rate-legend { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.legend-label { flex: 1; color: var(--gray-600); font-weight: 500; }
+.legend-val {
+  font-weight: 800;
+  color: var(--gray-800);
+  font-family: var(--font-display);
+}
+
+/* Quick action improvements */
+.qa-btn { flex-direction: column; padding: 14px 10px; gap: 6px !important; }
+.qa-icon { font-size: 20px; }
+.qa-btn span { font-size: 11.5px; }
+
+/* System info card */
+.sys-info-card { overflow: hidden; }
+.sys-info-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #F0FDF4, #ECFDF5);
+  border-bottom: 1px solid #D1FAE5;
+}
+.sys-info-icon { font-size: 24px; color: #059669; }
+.sys-info-title { font-size: 13px; font-weight: 700; color: var(--gray-800); }
+.sys-info-sub { font-size: 11px; color: var(--gray-500); }
+.sys-status-dot {
+  width: 10px;
+  height: 10px;
+  background: #10B981;
+  border-radius: 50%;
+  margin-left: auto;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.2);
+  animation: pulsate 2s infinite;
+}
+.sys-info-rows { padding: 4px 0; }
+.sys-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 18px;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--gray-600);
+  font-weight: 500;
+}
+.sys-info-row:last-child { border-bottom: none; }
+.sys-ok { color: #059669; font-weight: 600; font-size: 12px; }
+
+/* Grade overview chart */
+.grade-overview-wrap {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  padding: 24px 20px 16px;
+  gap: 12px;
+  min-height: 130px;
+}
+.grade-overview-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.grade-bar-wrap {
+  display: flex;
+  align-items: flex-end;
+  height: 80px;
+  width: 100%;
+  justify-content: center;
+}
+.grade-bar {
+  width: 70%;
+  border-radius: 6px 6px 2px 2px;
+  transition: height 1s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+  min-height: 4px;
+  height: 4px;
+}
+.grade-bar::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 40%;
+  background: rgba(255,255,255,0.2);
+  border-radius: 6px 6px 0 0;
+}
+.grade-bar-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gray-600);
+}
+
+/* Grade bar color classes */
+.grade-color-aplus { background: #059669; }
+.grade-color-a     { background: #10B981; }
+.grade-color-bplus { background: #3B82F6; }
+.grade-color-b     { background: #60A5FA; }
+.grade-color-cplus { background: #F59E0B; }
+.grade-color-c     { background: #FBBF24; }
+.grade-color-d     { background: #F97316; }
+.grade-color-f     { background: #EF4444; }
+</style>
+
+<!-- Dashboard JS -->
+<script>
+$(function(){
+
+  // FIX line 138: apply animation-delay via JS using data-index, not inline Jinja style attr
+  $('.stagger-row').each(function(){
+    var delay = ($(this).data('index') * 0.06) + 's';
+    $(this).css('animation-delay', delay);
+  });
+
+  // Animate donut
+  setTimeout(function(){
+    $('.donut-progress').each(function(){
+      var target = $(this).data('dash');
+      var el = this;
+      setTimeout(function(){
+        el.setAttribute('stroke-dasharray', target + ' 238.76');
+      }, 100);
+    });
+  }, 400);
+
+  // Animate grade bars
+  setTimeout(function(){
+    $('.grade-bar').each(function(){
+      var targetH = Math.min(parseInt($(this).data('height')) || 4, 80);
+      $(this).css('height', 0).animate({ height: targetH }, 800);
+    });
+  }, 600);
+
+  // Animate marks mini bars
+  setTimeout(function(){
+    $('.marks-mini-fill').each(function(){
+      var targetW = $(this).data('width') || 0;
+      $(this).css('width', 0);
+      var el = this;
+      setTimeout(function(){
+        $(el).css({ width: targetW + '%', transition: 'width 0.8s ease' });
+      }, 100);
+    });
+  }, 300);
+
+  // Animate dist bars
+  $('.dist-bar').each(function(){
+    var targetW = parseFloat($(this).data('width')) || 0;
+    $(this).css('width', 0).animate({ width: targetW + '%' }, 800);
+  });
+
+});
+</script>
+
+{% endblock %}

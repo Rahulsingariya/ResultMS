@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Subjects{% endblock %}
+{% block page_title %}Subjects{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <span class="count-info">{{ subjects|length }} subjects across all classes</span>
+  <a href="{{ url_for('add_subject') }}" class="btn btn-success">+ Add Subject</a>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>#</th><th>Subject Name</th><th>Class</th><th>Max Marks</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% set ns = namespace(last_class='') %}
+        {% for s in subjects %}
+          {% if s.class != ns.last_class %}
+            {% set ns.last_class = s.class %}
+            <tr class="group-row"><td colspan="5">{{ s.class }}</td></tr>
+          {% endif %}
+          <tr>
+            <td class="text-muted">{{ loop.index }}</td>
+            <td><strong>{{ s.name }}</strong></td>
+            <td>{{ s.class }}</td>
+            <td><span class="badge badge-orange">{{ s.max_marks }}</span></td>
+            <td class="action-cell">
+              <form method="post" action="{{ url_for('delete_subject', subid=s.id) }}"
+                    onsubmit="return confirm('Delete subject {{ s.name }}?')" style="display:inline">
+                <button class="btn-icon danger" title="Delete">🗑️</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5" class="empty-msg">No subjects found. <a href="{{ url_for('add_subject') }}">Add one →</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

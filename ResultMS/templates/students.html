@@ -1,0 +1,613 @@
+{% extends "base.html" %}
+{% block title %}Students{% endblock %}
+{% block page_title %}Students{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════ -->
+<div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-3">
+  <div>
+    <h2 class="page-section-title">
+      <i class="bi bi-people-fill me-2" style="color:var(--brand-500)"></i>Students
+    </h2>
+    <p class="page-section-sub">Manage all enrolled students across classes and sections.</p>
+  </div>
+  <a href="{{ url_for('add_student') }}" class="btn btn-primary">
+    <i class="bi bi-person-plus-fill me-1"></i> Register Student
+  </a>
+</div>
+
+<!-- ═══════════════════════════════════════
+     QUICK STATS ROW
+═══════════════════════════════════════ -->
+<div class="students-stats-row mb-4">
+  <div class="stu-mini-stat">
+    <div class="stu-mini-icon blue"><i class="bi bi-people-fill"></i></div>
+    <div>
+      <div class="stu-mini-val">{{ students|length }}</div>
+      <div class="stu-mini-lbl">
+        {% if query or selected_class %}Matching{% else %}Total{% endif %}
+      </div>
+    </div>
+  </div>
+  {% for c in classes %}
+  <div class="stu-mini-stat">
+    <div class="stu-mini-icon purple"><i class="bi bi-mortarboard-fill"></i></div>
+    <div>
+      <div class="stu-mini-val">
+        {{ students | selectattr('class','equalto', c.class) | list | length }}
+      </div>
+      <div class="stu-mini-lbl">{{ c.class }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ═══════════════════════════════════════
+     SEARCH & FILTER TOOLBAR
+═══════════════════════════════════════ -->
+<div class="card mb-4 filter-card">
+  <div class="filter-card-body">
+    <form class="d-flex gap-3 flex-wrap align-items-end" method="get" id="filterForm">
+
+      <!-- Search -->
+      <div class="filter-group">
+        <label class="filter-label">
+          <i class="bi bi-search me-1"></i>Search
+        </label>
+        <div class="search-wrap">
+          <i class="bi bi-search search-icon-inner"></i>
+          <input type="text" name="q" value="{{ query }}"
+                 placeholder="Name or roll number…"
+                 class="search-input form-control"
+                 id="searchInput" autocomplete="off"/>
+          {% if query %}
+          <button type="button" class="search-clear-btn" onclick="clearSearch()">
+            <i class="bi bi-x"></i>
+          </button>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Class filter -->
+      <div class="filter-group">
+        <label class="filter-label">
+          <i class="bi bi-mortarboard me-1"></i>Class
+        </label>
+        <select name="class" class="select-input form-select" id="classFilter"
+                onchange="this.form.submit()">
+          <option value="">All Classes</option>
+          {% for c in classes %}
+            <option value="{{ c.class }}"
+              {% if c.class == selected_class %}selected{% endif %}>
+              {{ c.class }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-funnel-fill me-1"></i>Filter
+        </button>
+        <a href="{{ url_for('students') }}" class="btn btn-ghost">
+          <i class="bi bi-x-circle me-1"></i>Clear
+        </a>
+      </div>
+
+    </form>
+
+    {% if query or selected_class %}
+    <div class="filter-active-pills mt-3">
+      <span class="filter-active-label">Active filters:</span>
+      {% if query %}
+      <span class="filter-pill">
+        <i class="bi bi-search me-1"></i>"{{ query }}"
+        <a href="{{ url_for('students', **({'class': selected_class} if selected_class else {})) }}"
+           class="filter-pill-remove"><i class="bi bi-x"></i></a>
+      </span>
+      {% endif %}
+      {% if selected_class %}
+      <span class="filter-pill">
+        <i class="bi bi-mortarboard me-1"></i>{{ selected_class }}
+        <a href="{{ url_for('students', **({'q': query} if query else {})) }}"
+           class="filter-pill-remove"><i class="bi bi-x"></i></a>
+      </span>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     STUDENTS TABLE
+═══════════════════════════════════════ -->
+<div class="card fade-in">
+  <div class="card-header">
+    <div class="d-flex align-items-center gap-2">
+      <div class="card-header-icon" style="background:#EEF2FF">
+        <i class="bi bi-table" style="color:#6366F1"></i>
+      </div>
+      <h3>Student Directory</h3>
+      <span class="badge badge-blue">{{ students|length }} record(s)</span>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="topbar-btn active-view" id="tableViewBtn" title="Table View"
+              onclick="setView('table')">
+        <i class="bi bi-table"></i>
+      </button>
+      <button class="topbar-btn" id="gridViewBtn" title="Grid View"
+              onclick="setView('grid')">
+        <i class="bi bi-grid-3x3-gap-fill"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- TABLE VIEW -->
+  <div id="tableView" class="table-wrap">
+    <table class="table" id="studentsTable">
+      <thead>
+        <tr>
+          <th style="width:40px">#</th>
+          <th data-sort="1"><i class="bi bi-person me-1"></i>Student</th>
+          <th data-sort="2">Roll No</th>
+          <th data-sort="3"><i class="bi bi-mortarboard me-1"></i>Class</th>
+          <th>Section</th>
+          <th>Email</th>
+          <th style="width:130px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <!-- FIX lines 165+172: removed Jinja from style attr; use CSS class + data-index for animation -->
+        <tr class="student-row fade-in stagger-row" data-index="{{ loop.index0 }}">
+          <td class="text-muted fw-semibold">{{ loop.index }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-3">
+              <!-- FIX line 165: gradient via CSS class avatar-color-N instead of inline Jinja style -->
+              <div class="student-avatar avatar-color-{{ loop.index0 % 5 }}">
+                {{ s.name[0] | upper }}
+              </div>
+              <div>
+                <div class="student-name">{{ s.name }}</div>
+                <div class="student-id-sub">ID #{{ s.id }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="badge badge-blue">
+              <i class="bi bi-hash"></i>{{ s.roll_no }}
+            </span>
+          </td>
+          <td>
+            <span class="class-badge">{{ s.class }}</span>
+          </td>
+          <td>
+            <span class="section-badge">{{ s.section }}</span>
+          </td>
+          <td class="text-muted">
+            {% if s.email %}
+              <a href="mailto:{{ s.email }}" class="email-link">
+                <i class="bi bi-envelope me-1"></i>{{ s.email }}
+              </a>
+            {% else %}
+              <span class="text-muted" style="font-size:12px">
+                <i class="bi bi-dash"></i> Not provided
+              </span>
+            {% endif %}
+          </td>
+          <td class="action-cell">
+            <div class="d-flex gap-1">
+              <a href="{{ url_for('marksheet') }}"
+                 class="btn-icon primary"
+                 data-bs-toggle="tooltip" title="View Marksheet">
+                <i class="bi bi-file-earmark-text"></i>
+              </a>
+              <a href="{{ url_for('edit_student', sid=s.id) }}"
+                 class="btn-icon"
+                 data-bs-toggle="tooltip" title="Edit Student">
+                <i class="bi bi-pencil-fill"></i>
+              </a>
+              <form method="post" action="{{ url_for('delete_student', sid=s.id) }}"
+                    data-confirm="Delete {{ s.name }} and all their results? This cannot be undone."
+                    style="display:inline">
+                <button type="submit" class="btn-icon danger"
+                        data-bs-toggle="tooltip" title="Delete Student">
+                  <i class="bi bi-trash3-fill"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" class="empty-msg">
+            <span class="empty-icon">👨‍🎓</span>
+            <div class="empty-title">No students found</div>
+            <div class="empty-sub">
+              {% if query or selected_class %}
+                Try adjusting your search filters
+              {% else %}
+                Start by registering your first student
+              {% endif %}
+            </div>
+            {% if not query and not selected_class %}
+            <a href="{{ url_for('add_student') }}" class="btn btn-primary btn-sm mt-2">
+              <i class="bi bi-person-plus-fill me-1"></i>Register First Student
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- GRID VIEW (hidden by default) -->
+  <div id="gridView" style="display:none; padding:20px">
+    <div class="students-grid">
+      {% for s in students %}
+      <!-- FIX lines 254+258: gradient via CSS class, animation-delay via data-index -->
+      <div class="student-grid-card fade-in stagger-grid" data-index="{{ loop.index0 }}">
+        <!-- FIX line 254-255: gradient via CSS class avatar-color-N instead of inline Jinja style -->
+        <div class="sgc-avatar avatar-color-{{ loop.index0 % 5 }}">
+          {{ s.name[0] | upper }}
+        </div>
+        <div class="sgc-name">{{ s.name }}</div>
+        <div class="d-flex justify-content-center gap-2 mb-3">
+          <span class="badge badge-blue"><i class="bi bi-hash"></i>{{ s.roll_no }}</span>
+          <span class="class-badge">{{ s.class }}</span>
+          <span class="section-badge">{{ s.section }}</span>
+        </div>
+        {% if s.email %}
+        <div class="sgc-email">
+          <i class="bi bi-envelope me-1"></i>{{ s.email }}
+        </div>
+        {% endif %}
+        <div class="sgc-actions">
+          <a href="{{ url_for('marksheet') }}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-file-earmark-text"></i>
+          </a>
+          <a href="{{ url_for('edit_student', sid=s.id) }}" class="btn btn-ghost btn-sm">
+            <i class="bi bi-pencil-fill"></i>
+          </a>
+          <form method="post" action="{{ url_for('delete_student', sid=s.id) }}"
+                data-confirm="Delete {{ s.name }}?"
+                style="display:inline">
+            <button type="submit" class="btn btn-sm btn-delete-grid">
+              <i class="bi bi-trash3-fill"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if students %}
+  <div class="table-footer">
+    <i class="bi bi-info-circle me-1"></i>
+    Showing <strong>{{ students|length }}</strong> student(s)
+    {% if selected_class %}in <strong>{{ selected_class }}</strong>{% endif %}
+    {% if query %}matching "<strong>{{ query }}</strong>"{% endif %}
+  </div>
+  {% endif %}
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     PAGE STYLES
+═══════════════════════════════════════ -->
+<style>
+.page-section-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--gray-900);
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+.page-section-sub {
+  font-size: 13px;
+  color: var(--gray-500);
+  margin: 4px 0 0;
+}
+
+/* Mini stats row */
+.students-stats-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.stu-mini-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-xs);
+  transition: var(--transition-fast);
+  flex: 1;
+  min-width: 140px;
+}
+.stu-mini-stat:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+.stu-mini-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.stu-mini-icon.blue   { background: #DBEAFE; color: #3B82F6; }
+.stu-mini-icon.purple { background: #EDE9FE; color: #7C3AED; }
+.stu-mini-val {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--gray-800);
+  line-height: 1;
+}
+.stu-mini-lbl {
+  font-size: 11px;
+  color: var(--gray-400);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+
+/* Filter card */
+.filter-card { overflow: visible; }
+.filter-card-body { padding: 18px 22px; }
+.filter-group { display: flex; flex-direction: column; gap: 5px; }
+.filter-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.search-wrap { position: relative; }
+.search-icon-inner {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray-400);
+  font-size: 13px;
+  pointer-events: none;
+}
+.search-wrap .search-input {
+  padding-left: 36px;
+  min-width: 260px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  font-size: 13.5px;
+  height: 40px;
+  font-family: var(--font-body);
+  background-image: none !important;
+}
+.search-wrap .search-input:focus {
+  border-color: var(--brand-400);
+  box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+}
+.search-clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--gray-400);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px;
+}
+
+/* Active filter pills */
+.filter-active-pills { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.filter-active-label { font-size: 12px; color: var(--gray-400); font-weight: 600; }
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--brand-50);
+  border: 1px solid var(--brand-200);
+  color: var(--brand-700);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+}
+.filter-pill-remove {
+  color: var(--brand-500);
+  font-size: 13px;
+  text-decoration: none;
+  line-height: 1;
+  margin-left: 2px;
+}
+.filter-pill-remove:hover { color: var(--danger); }
+
+/* Student avatar in table */
+.student-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  color: white;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: var(--font-display);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.student-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+.student-id-sub { font-size: 11px; color: var(--gray-400); }
+
+/* FIX lines 165, 169, 254, 255: Avatar color classes replace inline Jinja gradient style */
+.avatar-color-0 { background: linear-gradient(135deg, #6366F1, #8B5CF6); }
+.avatar-color-1 { background: linear-gradient(135deg, #3B82F6, #6366F1); }
+.avatar-color-2 { background: linear-gradient(135deg, #10B981, #3B82F6); }
+.avatar-color-3 { background: linear-gradient(135deg, #F59E0B, #EF4444); }
+.avatar-color-4 { background: linear-gradient(135deg, #EC4899, #8B5CF6); }
+
+/* Class & section badges */
+.class-badge {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #EDE9FE, #DDD6FE);
+  color: #5B21B6;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid #C4B5FD;
+}
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
+  color: #065F46;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid #A7F3D0;
+}
+.email-link {
+  color: var(--brand-600);
+  font-size: 12.5px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.email-link:hover { text-decoration: underline; color: var(--brand-800); }
+
+/* View toggle */
+.active-view {
+  background: var(--brand-50) !important;
+  border-color: var(--brand-200) !important;
+  color: var(--brand-600) !important;
+}
+
+/* Grid view */
+.students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+.student-grid-card {
+  background: linear-gradient(180deg, #FAFCFF, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 16px 16px;
+  text-align: center;
+  transition: var(--transition);
+  box-shadow: var(--shadow-xs);
+}
+.student-grid-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--brand-200);
+}
+.sgc-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-lg);
+  color: white;
+  font-size: 24px;
+  font-weight: 800;
+  font-family: var(--font-display);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.sgc-name {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--gray-900);
+  margin-bottom: 8px;
+}
+.sgc-email {
+  font-size: 11px;
+  color: var(--gray-400);
+  margin-bottom: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sgc-actions { display: flex; justify-content: center; gap: 6px; }
+
+/* FIX: delete button in grid (replaces inline style on grid delete button) */
+.btn-delete-grid {
+  background: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+.btn-delete-grid:hover {
+  background: #FEE2E2;
+  color: #B91C1C;
+}
+</style>
+
+<script>
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('filterForm').submit();
+}
+
+function setView(v) {
+  if (v === 'table') {
+    $('#tableView').show(); $('#gridView').hide();
+    $('#tableViewBtn').addClass('active-view');
+    $('#gridViewBtn').removeClass('active-view');
+  } else {
+    $('#tableView').hide(); $('#gridView').show();
+    $('#tableViewBtn').removeClass('active-view');
+    $('#gridViewBtn').addClass('active-view');
+  }
+  localStorage.setItem('studentView', v);
+}
+
+$(function(){
+  // Restore view preference
+  const saved = localStorage.getItem('studentView');
+  if (saved) setView(saved);
+
+  // FIX lines 172 & 258: apply animation-delay via JS from data-index, not inline Jinja style
+  $('.stagger-row, .stagger-grid').each(function(){
+    var delay = ($(this).data('index') * 0.04) + 's';
+    $(this).css('animation-delay', delay);
+  });
+
+  // Live search filter (client-side)
+  $('#searchInput').on('input', function(){
+    const q = $(this).val().toLowerCase();
+    if (q.length === 0) return;
+    $('.student-row').each(function(){
+      const text = $(this).text().toLowerCase();
+      $(this).toggle(text.includes(q));
+    });
+  });
+});
+</script>
+
+{% endblock %}

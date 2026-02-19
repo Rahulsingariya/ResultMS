@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Add Student{% endblock %}
+{% block page_title %}Add Student{% endblock %}
+
+{% block content %}
+<div class="form-container">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="page-section-title">
+        <i class="bi bi-person-plus-fill me-2" style="color:var(--brand-500)"></i>Register New Student
+      </h2>
+      <p class="page-section-sub">Fill in the details below to enrol a new student.</p>
+    </div>
+    <a href="{{ url_for('students') }}" class="btn btn-ghost">
+      <i class="bi bi-arrow-left me-1"></i> Back
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="d-flex align-items-center gap-2">
+        <div class="card-header-icon" style="background:#EEF2FF">
+          <i class="bi bi-person-fill" style="color:#6366F1"></i>
+        </div>
+        <h3>Student Information</h3>
+      </div>
+    </div>
+
+    <form method="post" class="form-body" id="addStudentForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Roll Number <span class="required">*</span></label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-hash input-icon"></i>
+            <input type="text" name="roll_no" placeholder="e.g. 2024001"
+                   required class="form-input input-with-icon"
+                   pattern="[A-Za-z0-9]+" title="Alphanumeric only"/>
+          </div>
+          <span class="form-hint"><i class="bi bi-info-circle me-1"></i>Must be unique for each student</span>
+        </div>
+        <div class="form-group">
+          <label>Full Name <span class="required">*</span></label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-person input-icon"></i>
+            <input type="text" name="name" placeholder="Student's full name"
+                   required class="form-input input-with-icon"
+                   minlength="2" maxlength="100"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Class <span class="required">*</span></label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-mortarboard input-icon"></i>
+            <select name="class" required class="form-input input-with-icon">
+              <option value="">— Select Class —</option>
+              <option value="Class 9">Class 9</option>
+              <option value="Class 10">Class 10</option>
+              <option value="Class 11">Class 11</option>
+              <option value="Class 12">Class 12</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Section <span class="required">*</span></label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-grid-3x3 input-icon"></i>
+            <select name="section" required class="form-input input-with-icon">
+              <option value="">— Select Section —</option>
+              <option value="A">Section A</option>
+              <option value="B">Section B</option>
+              <option value="C">Section C</option>
+              <option value="D">Section D</option>
+              <option value="E">Section E</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email Address <span class="text-muted" style="font-weight:400">(optional)</span></label>
+        <div class="input-icon-wrap">
+          <i class="bi bi-envelope input-icon"></i>
+          <input type="email" name="email" placeholder="student@school.com"
+                 class="form-input input-with-icon" style="max-width:420px"/>
+        </div>
+        <span class="form-hint"><i class="bi bi-shield-check me-1"></i>Used for notifications only</span>
+      </div>
+
+      <hr class="form-divider"/>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+          <i class="bi bi-person-check-fill me-1"></i> Register Student
+        </button>
+        <a href="{{ url_for('students') }}" class="btn btn-ghost btn-lg">
+          <i class="bi bi-x me-1"></i>Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.page-section-title{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--gray-900);margin:0}
+.page-section-sub{font-size:13px;color:var(--gray-500);margin:4px 0 0}
+.input-icon-wrap{position:relative}
+.input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400);font-size:14px;pointer-events:none;z-index:1}
+.input-with-icon{padding-left:38px !important}
+.form-input:focus{border-color:var(--brand-400);box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+</style>
+
+<script>
+$(function(){
+  $('#addStudentForm').on('submit', function(){
+    const $btn = $('#submitBtn');
+    $btn.html('<i class="bi bi-hourglass-split me-1"></i> Registering…').prop('disabled', true);
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block title %}Marksheet{% endblock %}
+{% block page_title %}Generate Marksheet{% endblock %}
+
+{% block content %}
+
+<!-- ══ Student data stored in HTML attribute — zero Jinja inside JS ══ -->
+<div id="studentDataStore"
+     data-students="{{ students | map(attribute='id') | list | tojson | forceescape }}"
+     style="display:none"
+     {% for s in students %}
+     data-student-{{ s.id }}="{{ s.name | replace('"','&quot;') }}|{{ s.roll_no }}|{{ s.class }}"
+     {% endfor %}>
+</div>
+
+<div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-3">
+  <div>
+    <h2 class="page-section-title">
+      <i class="bi bi-file-earmark-text-fill me-2" style="color:var(--brand-500)"></i>Generate Marksheet
+    </h2>
+    <p class="page-section-sub">Select a student and exam to view or print their marksheet.</p>
+  </div>
+</div>
+
+<div class="form-container" style="max-width:680px">
+  <div class="card">
+    <div class="card-header">
+      <div class="d-flex align-items-center gap-2">
+        <div class="card-header-icon" style="background:#EEF2FF">
+          <i class="bi bi-file-earmark-person-fill" style="color:#6366F1"></i>
+        </div>
+        <h3>Select Student &amp; Exam</h3>
+      </div>
+    </div>
+
+    <div class="form-body">
+      <div class="form-row">
+
+        <!-- Student -->
+        <div class="form-group">
+          <label>Student <span class="required">*</span></label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-person input-icon"></i>
+            <select id="msStudent" required class="form-input input-with-icon">
+              <option value="">— Choose student —</option>
+              {% for s in students %}
+                <option value="{{ s.id }}">
+                  {{ s.roll_no }} — {{ s.name }} ({{ s.class }})
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          {% if not students %}
+          <span class="form-hint" style="color:var(--danger)">
+            <i class="bi bi-exclamation-circle me-1"></i>No students found.
+            <a href="{{ url_for('add_student') }}">Add students first →</a>
+          </span>
+          {% endif %}
+        </div>
+
+        <!-- Exam -->
+        <div class="form-group">
+          <label>Exam Type <span class="required">*</span></label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-mortarboard input-icon"></i>
+            <select id="msExam" required class="form-input input-with-icon">
+              <option value="">— Choose exam —</option>
+              {% if exams %}
+                {% for e in exams %}
+                  <option value="{{ e.exam_type }}">{{ e.exam_type }}</option>
+                {% endfor %}
+              {% else %}
+                <option value="Unit Test 1">Unit Test 1</option>
+                <option value="Unit Test 2">Unit Test 2</option>
+                <option value="Mid Term">Mid Term</option>
+                <option value="Final Exam">Final Exam</option>
+                <option value="Practical">Practical</option>
+              {% endif %}
+            </select>
+          </div>
+          {% if not exams %}
+          <span class="form-hint">
+            <i class="bi bi-info-circle me-1"></i>No results entered yet — showing defaults
+          </span>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <!-- Preview card — shown after both selected -->
+      <div id="previewCard" style="display:none" class="preview-student-card">
+        <div class="psc-avatar" id="pscAvatar">?</div>
+        <div class="psc-info">
+          <div class="psc-name" id="pscName">—</div>
+          <div class="psc-meta" id="pscMeta">—</div>
+        </div>
+        <div class="psc-exam ms-auto">
+          <span class="badge badge-purple" id="pscExam">—</span>
+        </div>
+      </div>
+
+      <hr class="form-divider"/>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary btn-lg"
+                id="generateBtn" onclick="goMarksheet()" disabled>
+          <i class="bi bi-file-earmark-arrow-down-fill me-1"></i>
+          Generate Marksheet
+        </button>
+        <a href="{{ url_for('results') }}" class="btn btn-ghost btn-lg">
+          <i class="bi bi-table me-1"></i> View All Results
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick access links -->
+  {% if students and exams %}
+  <div class="card mt-3">
+    <div class="card-header">
+      <div class="d-flex align-items-center gap-2">
+        <div class="card-header-icon" style="background:#FEF3C7">
+          <i class="bi bi-clock-history" style="color:#F59E0B"></i>
+        </div>
+        <h3>Quick Access</h3>
+      </div>
+    </div>
+    <div class="quick-links-wrap">
+      {% for s in students[:6] %}
+      <a href="/marksheet/{{ s.id }}/{{ exams[0].exam_type }}"
+         class="quick-link-item">
+        <div class="ql-avatar">{{ s.name[0] }}</div>
+        <div class="ql-info">
+          <div class="ql-name">{{ s.name }}</div>
+          <div class="ql-meta">{{ s.roll_no }} &middot; {{ s.class }}</div>
+        </div>
+        <i class="bi bi-chevron-right ql-arrow"></i>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<style>
+.page-section-title{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--gray-900);margin:0}
+.page-section-sub{font-size:13px;color:var(--gray-500);margin:4px 0 0}
+.input-icon-wrap{position:relative;display:block;width:100%}
+.input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400);font-size:14px;pointer-events:none;z-index:1}
+.input-with-icon{padding-left:38px !important}
+.preview-student-card{display:flex;align-items:center;gap:14px;padding:14px 16px;background:linear-gradient(135deg,#EEF2FF,#F5F3FF);border:1.5px solid var(--brand-200);border-radius:var(--radius-md);animation:fadeIn .3s ease;margin-top:4px}
+.psc-avatar{width:44px;height:44px;border-radius:var(--radius);background:linear-gradient(135deg,var(--brand-500),#7C3AED);color:white;font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);flex-shrink:0}
+.psc-name{font-size:14px;font-weight:700;color:var(--gray-800)}
+.psc-meta{font-size:12px;color:var(--gray-500);margin-top:2px}
+.quick-links-wrap{padding:8px 0}
+.quick-link-item{display:flex;align-items:center;gap:12px;padding:11px 20px;text-decoration:none;color:var(--gray-700);border-bottom:1px solid var(--border-light);transition:var(--transition-fast)}
+.quick-link-item:last-child{border-bottom:none}
+.quick-link-item:hover{background:var(--brand-50);color:var(--brand-700)}
+.ql-avatar{width:32px;height:32px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--brand-500),#7C3AED);color:white;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ql-name{font-size:13px;font-weight:600}
+.ql-meta{font-size:11px;color:var(--gray-400)}
+.ql-arrow{color:var(--gray-300);font-size:13px}
+</style>
+
+<!-- Pure JS only — zero Jinja tags inside script block -->
+<script>
+(function () {
+  // Read student data from HTML data-* attributes — no Jinja in JS
+  function buildStudentMap() {
+    var store = document.getElementById('studentDataStore');
+    if (!store) return {};
+    var map = {};
+    var attrs = store.attributes;
+    for (var i = 0; i < attrs.length; i++) {
+      var attr = attrs[i];
+      if (attr.name.indexOf('data-student-') === 0) {
+        var id = attr.name.replace('data-student-', '');
+        var parts = attr.value.split('|');
+        map[id] = { name: parts[0] || '', roll: parts[1] || '', cls: parts[2] || '' };
+      }
+    }
+    return map;
+  }
+
+  var studentMap = buildStudentMap();
+
+  function checkReady() {
+    var sid  = document.getElementById('msStudent').value;
+    var exam = document.getElementById('msExam').value;
+    var btn  = document.getElementById('generateBtn');
+    var card = document.getElementById('previewCard');
+
+    if (sid && exam) {
+      btn.removeAttribute('disabled');
+      var st = studentMap[sid];
+      if (st) {
+        document.getElementById('pscAvatar').textContent = st.name.charAt(0).toUpperCase();
+        document.getElementById('pscName').textContent   = st.name;
+        document.getElementById('pscMeta').textContent   = st.roll + ' \u00b7 ' + st.cls;
+        document.getElementById('pscExam').textContent   = exam;
+        card.style.display = 'flex';
+      }
+    } else {
+      btn.setAttribute('disabled', 'disabled');
+      card.style.display = 'none';
+    }
+  }
+
+  function goMarksheet() {
+    var sid  = document.getElementById('msStudent').value;
+    var exam = document.getElementById('msExam').value;
+    if (sid && exam) {
+      window.location.href = '/marksheet/' + sid + '/' + exam;
+    }
+  }
+
+  document.getElementById('msStudent').addEventListener('change', checkReady);
+  document.getElementById('msExam').addEventListener('change', checkReady);
+
+  // Expose goMarksheet globally for the button onclick
+  window.goMarksheet = goMarksheet;
+})();
+</script>
+
+{% endblock %}

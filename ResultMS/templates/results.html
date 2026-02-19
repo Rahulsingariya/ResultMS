@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}Results{% endblock %}
+{% block page_title %}Results{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <form class="search-form" method="get">
+    <input type="text" name="q" placeholder="Search student name or roll no…"
+           value="{{ query }}" class="search-input"/>
+    <select name="class" class="select-input">
+      <option value="">All Classes</option>
+      {% for c in classes %}
+        <option value="{{ c.class }}" {% if c.class == selected_class %}selected{% endif %}>{{ c.class }}</option>
+      {% endfor %}
+    </select>
+    <select name="exam" class="select-input">
+      <option value="">All Exams</option>
+      {% for e in exams %}
+        <option {% if e.exam_type == selected_exam %}selected{% endif %}>{{ e.exam_type }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary">Filter</button>
+    <a href="{{ url_for('results') }}" class="btn btn-ghost">Clear</a>
+  </form>
+  <a href="{{ url_for('add_result') }}" class="btn btn-success">+ Enter Result</a>
+</div>
+
+{% if grouped %}
+  <div class="results-count">Showing {{ grouped|length }} student result(s)</div>
+
+  {% for grp in grouped %}
+  <div class="student-result-card">
+
+    <!-- Student Header -->
+    <div class="src-header">
+      <div class="src-student-info">
+        <div class="src-avatar">{{ grp.student_name[0] }}</div>
+        <div>
+          <div class="src-name">{{ grp.student_name }}</div>
+          <div class="src-meta">
+            <span class="badge badge-blue">{{ grp.roll_no }}</span>
+            <span class="badge badge-orange">{{ grp.class }} — Sec {{ grp.section }}</span>
+            <span class="badge badge-purple">{{ grp.exam_type }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="src-summary">
+        <div class="src-stat">
+          <div class="src-stat-val">{{ grp.total }}/{{ grp.total_max }}</div>
+          <div class="src-stat-lbl">Total Marks</div>
+        </div>
+        <div class="src-stat">
+          <div class="src-stat-val">{{ grp.percentage }}%</div>
+          <div class="src-stat-lbl">Percentage</div>
+        </div>
+        <div class="src-stat">
+          <span class="grade-pill {{ grp.overall_grade | lower | replace('+','plus') }} grade-lg">
+            {{ grp.overall_grade }}
+          </span>
+          <div class="src-stat-lbl">Grade</div>
+        </div>
+        <div class="src-stat">
+          {% if grp.status == 'PASS' %}
+            <span class="status-badge pass">✓ PASS</span>
+          {% else %}
+            <span class="status-badge fail">✗ FAIL</span>
+          {% endif %}
+          <div class="src-stat-lbl">Status</div>
+        </div>
+        <div class="src-actions">
+          <a href="{{ url_for('marksheet_view', sid=grp.student_id, exam_type=grp.exam_type) }}"
+             class="btn btn-primary btn-sm">📄 Marksheet</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subjects Table -->
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Subject</th>
+            <th>Max Marks</th>
+            <th>Marks Obtained</th>
+            <th>Percentage</th>
+            <th>Grade</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in grp.subjects %}
+          <tr>
+            <td class="text-muted">{{ loop.index }}</td>
+            <td><strong>{{ s.subject_name }}</strong></td>
+            <td>{{ s.max_marks }}</td>
+            <td><strong>{{ s.marks }}</strong></td>
+            <td>{{ "%.1f"|format(s.marks / s.max_marks * 100) }}%</td>
+            <td>
+              <span class="grade-pill {{ s.grade | lower | replace('+','plus') }}">{{ s.grade }}</span>
+            </td>
+            <td>
+              {% if s.marks >= s.max_marks * 0.33 %}
+                <span class="status-pass">PASS</span>
+              {% else %}
+                <span class="status-fail">FAIL</span>
+              {% endif %}
+            </td>
+            <td>
+              <form method="post" action="{{ url_for('delete_result', rid=s.id) }}"
+                    onsubmit="return confirm('Delete {{ s.subject_name }} result?')"
+                    style="display:inline">
+                <button class="btn-icon danger" title="Delete">🗑️</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+  {% endfor %}
+
+{% else %}
+  <div class="card">
+    <div class="empty-msg" style="padding:48px">
+      No results found.
+      <a href="{{ url_for('add_result') }}">Enter first result →</a>
+    </div>
+  </div>
+{% endif %}
+
+<style>
+.results-count{font-size:13px;color:var(--text-muted);margin-bottom:12px}
+
+.student-result-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  margin-bottom:20px;
+  overflow:hidden;
+}
+
+.src-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 20px;
+  background:linear-gradient(135deg,#F8FAFC,#EEF2FF);
+  border-bottom:1px solid var(--border);
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.src-student-info{display:flex;align-items:center;gap:12px}
+
+.src-avatar{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,#4F46E5,#818CF8);
+  color:white;font-size:18px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+
+.src-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:5px}
+.src-meta{display:flex;gap:6px;flex-wrap:wrap}
+
+.src-summary{
+  display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+}
+
+.src-stat{text-align:center}
+.src-stat-val{font-size:16px;font-weight:700;color:var(--text);margin-bottom:3px}
+.src-stat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+
+.status-badge{
+  display:inline-block;padding:4px 14px;border-radius:99px;
+  font-size:13px;font-weight:700;
+}
+.status-badge.pass{background:#D1FAE5;color:#065F46}
+.status-badge.fail{background:#FEE2E2;color:#991B1B}
+
+.src-actions{margin-left:8px}
+.btn-sm{padding:6px 12px;font-size:12px}
+</style>
+{% endblock %}

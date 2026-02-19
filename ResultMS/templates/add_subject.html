@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Add Subject{% endblock %}
+{% block page_title %}Add Subject{% endblock %}
+
+{% block content %}
+<div class="form-container">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="page-section-title">
+        <i class="bi bi-journal-plus me-2" style="color:var(--brand-500)"></i>Add New Subject
+      </h2>
+      <p class="page-section-sub">Add a subject to a specific class with its maximum marks.</p>
+    </div>
+    <a href="{{ url_for('subjects') }}" class="btn btn-ghost">
+      <i class="bi bi-arrow-left me-1"></i> Back
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="d-flex align-items-center gap-2">
+        <div class="card-header-icon" style="background:#D1FAE5">
+          <i class="bi bi-journal-bookmark-fill" style="color:#059669"></i>
+        </div>
+        <h3>Subject Details</h3>
+      </div>
+    </div>
+
+    <form method="post" class="form-body" id="addSubjectForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Subject Name <span class="required">*</span></label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-journal-text input-icon"></i>
+            <input type="text" name="name" placeholder="e.g. Mathematics"
+                   required class="form-input input-with-icon"
+                   minlength="2" maxlength="80"/>
+          </div>
+          <span class="form-hint"><i class="bi bi-info-circle me-1"></i>e.g. Mathematics, Science, English</span>
+        </div>
+        <div class="form-group">
+          <label>Class <span class="required">*</span></label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-mortarboard input-icon"></i>
+            <select name="class" required class="form-input input-with-icon">
+              <option value="">— Select Class —</option>
+              <option value="Class 9">Class 9</option>
+              <option value="Class 10">Class 10</option>
+              <option value="Class 11">Class 11</option>
+              <option value="Class 12">Class 12</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Maximum Marks</label>
+        <div class="d-flex align-items-center gap-3">
+          <div class="input-icon-wrap">
+            <i class="bi bi-123 input-icon"></i>
+            <input type="number" name="max_marks" value="100"
+                   min="1" max="1000"
+                   class="form-input input-with-icon"
+                   style="max-width:180px" id="maxMarksInput"/>
+          </div>
+          <div class="marks-presets">
+            <span class="marks-preset-lbl">Quick select:</span>
+            <button type="button" class="preset-btn" onclick="setMarks(25)">25</button>
+            <button type="button" class="preset-btn" onclick="setMarks(50)">50</button>
+            <button type="button" class="preset-btn active" onclick="setMarks(100)">100</button>
+            <button type="button" class="preset-btn" onclick="setMarks(150)">150</button>
+            <button type="button" class="preset-btn" onclick="setMarks(200)">200</button>
+          </div>
+        </div>
+        <span class="form-hint"><i class="bi bi-info-circle me-1"></i>Total marks for this subject's exam</span>
+      </div>
+
+      <hr class="form-divider"/>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+          <i class="bi bi-journal-check me-1"></i> Add Subject
+        </button>
+        <a href="{{ url_for('subjects') }}" class="btn btn-ghost btn-lg">
+          <i class="bi bi-x me-1"></i>Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.page-section-title{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--gray-900);margin:0}
+.page-section-sub{font-size:13px;color:var(--gray-500);margin:4px 0 0}
+.input-icon-wrap{position:relative;display:inline-block;width:100%}
+.input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400);font-size:14px;pointer-events:none;z-index:1}
+.input-with-icon{padding-left:38px !important}
+.marks-presets{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.marks-preset-lbl{font-size:12px;color:var(--gray-400);font-weight:600}
+.preset-btn{padding:5px 12px;border:1.5px solid var(--border);border-radius:var(--radius-full);background:var(--surface);font-size:12px;font-weight:700;cursor:pointer;transition:var(--transition-fast);color:var(--gray-600)}
+.preset-btn:hover,.preset-btn.active{background:var(--brand-600);border-color:var(--brand-600);color:white}
+</style>
+
+<script>
+function setMarks(val){
+  document.getElementById('maxMarksInput').value = val;
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+$(function(){
+  $('#addSubjectForm').on('submit', function(){
+    $('#submitBtn').html('<i class="bi bi-hourglass-split me-1"></i> Adding…').prop('disabled', true);
+  });
+});
+</script>
+{% endblock %}

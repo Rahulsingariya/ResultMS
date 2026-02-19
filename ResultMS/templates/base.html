@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Dashboard{% endblock %} — ResultMS</title>
+
+  <!-- Google Fonts: Syne (display) + Plus Jakarta Sans (body) + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<aside class="sidebar" id="sidebar">
+
+  <!-- Brand -->
+  <div class="sidebar-brand">
+    <div class="brand-logo-wrap">🎓</div>
+    <div class="brand-text-wrap">
+      <div class="brand-name">Result<span>MS</span></div>
+      <div class="brand-tagline">Management System</div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main Menu</div>
+
+    <a href="{{ url_for('dashboard') }}"
+       class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+      <i class="bi bi-grid-1x2-fill nav-icon"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="{{ url_for('students') }}"
+       class="nav-item {% if 'student' in request.endpoint %}active{% endif %}">
+      <i class="bi bi-people-fill nav-icon"></i>
+      <span>Students</span>
+    </a>
+
+    <a href="{{ url_for('subjects') }}"
+       class="nav-item {% if 'subject' in request.endpoint %}active{% endif %}">
+      <i class="bi bi-journal-bookmark-fill nav-icon"></i>
+      <span>Subjects</span>
+    </a>
+
+    <div class="nav-section-label">Academics</div>
+
+    <a href="{{ url_for('results') }}"
+       class="nav-item {% if request.endpoint in ['results','add_result','delete_result'] %}active{% endif %}">
+      <i class="bi bi-clipboard2-data-fill nav-icon"></i>
+      <span>Results</span>
+    </a>
+
+    <a href="{{ url_for('marksheet') }}"
+       class="nav-item {% if 'marksheet' in request.endpoint %}active{% endif %}">
+      <i class="bi bi-file-earmark-text-fill nav-icon"></i>
+      <span>Marksheet</span>
+    </a>
+  </nav>
+
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">A</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name">Administrator</div>
+        <div class="sidebar-user-role">
+          <span class="pulse-dot" style="width:6px;height:6px;margin-right:4px"></span>
+          Active Session
+        </div>
+      </div>
+    </div>
+  </div>
+
+</aside>
+
+<!-- ═══════════ MAIN CONTENT ═══════════ -->
+<main class="main-content" id="main">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle sidebar">
+      <i class="bi bi-list"></i>
+    </button>
+
+    <div class="topbar-breadcrumb">
+      <span class="breadcrumb-home">ResultMS</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="page-title">{% block page_title %}Dashboard{% endblock %}</span>
+    </div>
+
+    <div class="topbar-right">
+      <a href="{{ url_for('add_result') }}"
+         class="topbar-btn" data-bs-toggle="tooltip" title="Enter Result">
+        <i class="bi bi-plus-lg"></i>
+      </a>
+      <a href="{{ url_for('marksheet') }}"
+         class="topbar-btn" data-bs-toggle="tooltip" title="Generate Marksheet">
+        <i class="bi bi-file-earmark-text"></i>
+      </a>
+      <div class="date-badge" id="liveClock">Loading…</div>
+    </div>
+  </header>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap">
+        {% for cat, msg in messages %}
+          <div class="flash flash-{{ cat }}">
+            <span class="flash-icon">
+              {% if cat == 'success' %}✅
+              {% elif cat == 'error' %}❌
+              {% else %}ℹ️{% endif %}
+            </span>
+            <span class="flash-msg">{{ msg }}</span>
+            <button class="flash-close" aria-label="Close">✕</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Content -->
+  <div class="content-area">
+    {% block content %}{% endblock %}
+  </div>
+
+</main>
+
+<!-- ═══════════ SCRIPTS ═══════════ -->
+<!-- jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<!-- Bootstrap 5 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<!-- Custom JS -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

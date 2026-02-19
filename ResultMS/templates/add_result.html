@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Enter Result{% endblock %}
+{% block page_title %}Enter Result{% endblock %}
+
+{% block content %}
+<div class="form-container" style="max-width:860px">
+  <div class="card">
+    <div class="card-header">
+      <h3>Enter / Update Result</h3>
+      <a href="{{ url_for('results') }}" class="link-sm">← Back</a>
+    </div>
+
+    <!-- Step 1: Pick student + exam -->
+    <div class="form-body" style="padding-bottom:0">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Student <span class="required">*</span></label>
+          <select id="studentSelect" class="form-input">
+            <option value="">Select Student</option>
+            {% for s in students %}
+              <option value="{{ s.id }}" data-class="{{ s.class }}">
+                {{ s.roll_no }} — {{ s.name }} ({{ s.class }})
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Exam Type <span class="required">*</span></label>
+          <select id="examSelect" class="form-input">
+            <option value="">Select Exam</option>
+            <option>Unit Test 1</option>
+            <option>Unit Test 2</option>
+            <option>Mid Term</option>
+            <option>Final Exam</option>
+            <option>Practical</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Subjects table shown after both selected -->
+    <div id="subjectsSection" style="display:none">
+      <div class="subjects-header">
+        <span id="subjectsTitle">Enter marks for all subjects</span>
+        <span class="info-chip">💡 Existing results will be updated automatically</span>
+      </div>
+
+      <form method="post" id="resultForm">
+        <input type="hidden" name="student_id" id="hiddenStudentId"/>
+        <input type="hidden" name="exam_type"   id="hiddenExamType"/>
+
+        <div class="table-wrap">
+          <table class="table" id="subjectsTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Subject</th>
+                <th>Max Marks</th>
+                <th>Marks Obtained <span class="required">*</span></th>
+                <th>Grade Preview</th>
+              </tr>
+            </thead>
+            <tbody id="subjectRows"></tbody>
+          </table>
+        </div>
+
+        <div class="form-actions" style="padding:16px 20px;border-top:1px solid var(--border)">
+          <button type="submit" class="btn btn-success btn-lg">✓ Save All Results</button>
+          <a href="{{ url_for('results') }}" class="btn btn-ghost btn-lg">Cancel</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Placeholder -->
+    <div id="placeholder" class="placeholder-msg">
+      <span>👆 Select a student and exam type above to enter marks</span>
+    </div>
+  </div>
+</div>
+
+<style>
+.subjects-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#F8FAFC;border-top:1px solid var(--border);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
+.subjects-header span{font-size:13.5px;font-weight:600;color:var(--text)}
+.info-chip{font-size:12px!important;font-weight:400!important;color:#1E40AF!important;background:#EFF6FF;padding:4px 10px;border-radius:99px;border:1px solid #BFDBFE}
+.marks-input{width:130px;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s;text-align:center}
+.marks-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.12)}
+.marks-input.invalid{border-color:#EF4444;background:#FEF2F2}
+.marks-input.valid{border-color:#10B981}
+.placeholder-msg{padding:36px;text-align:center;color:var(--text-muted);font-size:13.5px;border-top:1px solid var(--border)}
+</style>
+
+<script>
+const studentSelect = document.getElementById('studentSelect');
+const examSelect    = document.getElementById('examSelect');
+const section       = document.getElementById('subjectsSection');
+const placeholder   = document.getElementById('placeholder');
+const subjectRows   = document.getElementById('subjectRows');
+const subjectsTitle = document.getElementById('subjectsTitle');
+const hiddenSid     = document.getElementById('hiddenStudentId');
+const hiddenExam    = document.getElementById('hiddenExamType');
+
+function calcGrade(pct){
+  if(pct>=90)return'A+';if(pct>=80)return'A';if(pct>=70)return'B+';
+  if(pct>=60)return'B';if(pct>=50)return'C+';if(pct>=40)return'C';
+  if(pct>=33)return'D';return'F';
+}
+function gradeClass(g){return g.toLowerCase().replace('+','plus')}
+
+function updateGradeCell(input, maxMarks, gradeCell){
+  const val = parseFloat(input.value);
+  if(isNaN(val)||input.value===''){
+    gradeCell.innerHTML='<span style="color:var(--text-muted)">—</span>';
+    input.classList.remove('valid','invalid');return;
+  }
+  if(val<0||val>maxMarks){
+    gradeCell.innerHTML='<span style="color:#EF4444;font-size:12px">Out of range</span>';
+    input.classList.add('invalid');input.classList.remove('valid');return;
+  }
+  input.classList.add('valid');input.classList.remove('invalid');
+  const pct=val/maxMarks*100, grade=calcGrade(pct);
+  gradeCell.innerHTML=`<span class="grade-pill ${gradeClass(grade)}">${grade}</span> <span style="font-size:11px;color:var(--text-muted)">${pct.toFixed(1)}%</span>`;
+}
+
+async function loadSubjects(){
+  const sid  = studentSelect.value;
+  const exam = examSelect.value;
+  if(!sid||!exam){section.style.display='none';placeholder.style.display='block';return;}
+
+  const cls     = studentSelect.selectedOptions[0].dataset.class;
+  const stuName = studentSelect.selectedOptions[0].textContent.trim();
+
+  const res  = await fetch(`/api/subjects?class=${encodeURIComponent(cls)}`);
+  const subs = await res.json();
+
+  hiddenSid.value  = sid;
+  hiddenExam.value = exam;
+  subjectsTitle.textContent = `${stuName} — ${exam} (${subs.length} subjects)`;
+
+  subjectRows.innerHTML = '';
+  if(subs.length===0){
+    subjectRows.innerHTML=`<tr><td colspan="5" class="empty-msg">No subjects for ${cls}. <a href="/subjects/add">Add subjects →</a></td></tr>`;
+    section.style.display='block';placeholder.style.display='none';return;
+  }
+
+  subs.forEach((sub,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="text-muted">${i+1}</td>
+      <td><strong>${sub.name}</strong></td>
+      <td><span class="badge badge-orange">${sub.max_marks}</span></td>
+      <td><input type="number" class="marks-input" name="marks_${sub.id}"
+           min="0" max="${sub.max_marks}" step="0.5"
+           placeholder="0 – ${sub.max_marks}" required/></td>
+      <td class="grade-cell" id="grade_${sub.id}"><span style="color:var(--text-muted)">—</span></td>`;
+    subjectRows.appendChild(tr);
+    const input=tr.querySelector('input'), gradeCell=tr.querySelector('.grade-cell');
+    input.addEventListener('input',()=>updateGradeCell(input,sub.max_marks,gradeCell));
+  });
+
+  section.style.display='block';placeholder.style.display='none';
+  subjectRows.querySelector('input').focus();
+}
+
+studentSelect.addEventListener('change',loadSubjects);
+examSelect.addEventListener('change',loadSubjects);
+
+document.getElementById('resultForm').addEventListener('submit',(e)=>{
+  const inputs=subjectRows.querySelectorAll('input[type=number]');
+  let valid=true;
+  inputs.forEach(inp=>{
+    if(inp.value===''||inp.classList.contains('invalid')){inp.classList.add('invalid');valid=false;}
+  });
+  if(!valid){e.preventDefault();alert('Please fill valid marks for all subjects.');}
+});
+</script>
+{% endblock %}
