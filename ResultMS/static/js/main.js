@@ -1,13 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════
-   RESULT MANAGEMENT SYSTEM — Premium JS v2.0
-   jQuery Enhanced | Animations | Micro-interactions
-═══════════════════════════════════════════════════════════════ */
-
 $(function () {
 
-  /* ══════════════════════════════════════
-     1. LIVE CLOCK
-  ══════════════════════════════════════ */
   function updateClock() {
     const now  = new Date();
     const opts = {
@@ -20,9 +12,6 @@ $(function () {
   setInterval(updateClock, 30000);
 
 
-  /* ══════════════════════════════════════
-     2. SIDEBAR TOGGLE
-  ══════════════════════════════════════ */
   $('#menuToggle').on('click', function () {
     $('#sidebar').toggleClass('open');
     $('body').toggleClass('sidebar-open');
@@ -45,9 +34,6 @@ $(function () {
   });
 
 
-  /* ══════════════════════════════════════
-     3. AUTO-DISMISS FLASH MESSAGES
-  ══════════════════════════════════════ */
   $('.flash').each(function (i) {
     const $flash = $(this);
     setTimeout(function () {
@@ -62,9 +48,6 @@ $(function () {
   });
 
 
-  /* ══════════════════════════════════════
-     4. ANIMATED STAT COUNTERS
-  ══════════════════════════════════════ */
   function animateCounter($el) {
     const target = parseInt($el.text()) || 0;
     if (target === 0) return;
@@ -95,10 +78,6 @@ $(function () {
     counterObserver.observe(this);
   });
 
-
-  /* ══════════════════════════════════════
-     5. DISTRIBUTION BAR ANIMATION
-  ══════════════════════════════════════ */
   const barObserver = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       if (entry.isIntersecting) {
@@ -121,10 +100,6 @@ $(function () {
     barObserver.observe(this);
   });
 
-
-  /* ══════════════════════════════════════
-     6. CARD ENTRANCE ANIMATIONS
-  ══════════════════════════════════════ */
   const cardObserver = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry, i) {
       if (entry.isIntersecting) {
@@ -143,19 +118,12 @@ $(function () {
   });
 
 
-  /* ══════════════════════════════════════
-     7. TABLE ROW HOVER ENHANCEMENT
-  ══════════════════════════════════════ */
   $(document).on('mouseenter', '.table tbody tr', function () {
     $(this).find('td:first-child').css('border-left', '3px solid #6366F1');
   }).on('mouseleave', '.table tbody tr', function () {
     $(this).find('td:first-child').css('border-left', '');
   });
 
-
-  /* ══════════════════════════════════════
-     8. BUTTON LOADING STATE
-  ══════════════════════════════════════ */
   $(document).on('click', 'button[type=submit].btn-success, button[type=submit].btn-primary', function () {
     const $btn = $(this);
     const orig = $btn.html();
@@ -167,26 +135,18 @@ $(function () {
       }
     }, 50);
 
-    // Re-enable after 8s as safety net
     setTimeout(function () {
       $btn.html(orig).prop('disabled', false).removeClass('loading');
     }, 8000);
   });
 
 
-  /* ══════════════════════════════════════
-     9. FORM FIELD FOCUS EFFECTS
-  ══════════════════════════════════════ */
   $(document).on('focus', '.form-input, .marks-input', function () {
     $(this).closest('.form-group').addClass('form-group--focused');
   }).on('blur', '.form-input, .marks-input', function () {
     $(this).closest('.form-group').removeClass('form-group--focused');
   });
 
-
-  /* ══════════════════════════════════════
-     10. CONFIRMATION DIALOGS (ENHANCED)
-  ══════════════════════════════════════ */
   $(document).on('submit', 'form[data-confirm]', function (e) {
     const msg = $(this).data('confirm') || 'Are you sure?';
     if (!confirm(msg)) {
@@ -194,10 +154,6 @@ $(function () {
     }
   });
 
-
-  /* ══════════════════════════════════════
-     11. SEARCH INPUT CLEAR BUTTON
-  ══════════════════════════════════════ */
   $('.search-input').each(function () {
     const $input = $(this);
     if ($input.val().length > 0) {
@@ -236,18 +192,12 @@ $(function () {
   }
 
 
-  /* ══════════════════════════════════════
-     12. TOOLTIP INIT (Bootstrap)
-  ══════════════════════════════════════ */
   if (typeof bootstrap !== 'undefined') {
     const tooltipEls = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     tooltipEls.forEach(el => new bootstrap.Tooltip(el, { trigger: 'hover' }));
   }
 
 
-  /* ══════════════════════════════════════
-     13. GRADE PILL HOVER POPOVER
-  ══════════════════════════════════════ */
   const gradeDesc = {
     'A+': '90–100% · Outstanding',
     'A':  '80–89% · Excellent',
@@ -288,9 +238,6 @@ $(function () {
   });
 
 
-  /* ══════════════════════════════════════
-     14. PRINT DATE
-  ══════════════════════════════════════ */
   const $printDate = $('#printDate');
   if ($printDate.length) {
     $printDate.text(new Date().toLocaleDateString('en-IN', {
@@ -298,10 +245,6 @@ $(function () {
     }));
   }
 
-
-  /* ══════════════════════════════════════
-     15. SCROLL TO FLASH
-  ══════════════════════════════════════ */
   if ($('.flash-wrap .flash').length) {
     $('html, body').animate({
       scrollTop: $('.flash-wrap').offset().top - 80
@@ -309,9 +252,6 @@ $(function () {
   }
 
 
-  /* ══════════════════════════════════════
-     16. TOPBAR SHADOW ON SCROLL
-  ══════════════════════════════════════ */
   $(window).on('scroll', function () {
     if ($(this).scrollTop() > 10) {
       $('.topbar').css('box-shadow', '0 4px 20px rgba(0,0,0,0.1)');
@@ -321,9 +261,7 @@ $(function () {
   });
 
 
-  /* ══════════════════════════════════════
-     17. TABLE SORT INDICATOR
-  ══════════════════════════════════════ */
+
   $('.table th[data-sort]').css('cursor', 'pointer').on('click', function () {
     const col = $(this).data('sort');
     const $table = $(this).closest('table');
@@ -349,9 +287,6 @@ $(function () {
   });
 
 
-  /* ══════════════════════════════════════
-     18. SMOOTH PAGE TRANSITIONS
-  ══════════════════════════════════════ */
   $('a.nav-item').on('click', function (e) {
     const href = $(this).attr('href');
     if (!href || href === '#' || href.startsWith('javascript')) return;
@@ -367,9 +302,6 @@ $(function () {
   $('body').css('opacity', '0').animate({ opacity: 1 }, 300);
 
 
-  /* ══════════════════════════════════════
-     19. INPUT RIPPLE EFFECT
-  ══════════════════════════════════════ */
   $(document).on('focus', '.marks-input', function () {
     $(this).closest('tr').css({
       background: 'linear-gradient(90deg, #F0F4FF, #FAFCFF)',
@@ -380,9 +312,6 @@ $(function () {
   });
 
 
-  /* ══════════════════════════════════════
-     20. KEYBOARD SHORTCUT — Ctrl+Enter to submit
-  ══════════════════════════════════════ */
   $(document).on('keydown', function (e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       const $form = $('form#resultForm');
@@ -393,9 +322,6 @@ $(function () {
   });
 
 
-  /* ══════════════════════════════════════
-     21. SIDEBAR ACTIVE LINK HIGHLIGHT
-  ══════════════════════════════════════ */
   const currentPath = window.location.pathname;
   $('.nav-item').each(function () {
     const href = $(this).attr('href');
@@ -407,9 +333,6 @@ $(function () {
   });
 
 
-  /* ══════════════════════════════════════
-     22. MARK TABLE PROGRESS BARS
-  ══════════════════════════════════════ */
   $('.ms-table tbody tr').each(function () {
     const $cells = $(this).find('td');
     if ($cells.length >= 5) {
@@ -437,9 +360,6 @@ $(function () {
   }, 400);
 
 
-  /* ══════════════════════════════════════
-     23. BACK TO TOP BUTTON
-  ══════════════════════════════════════ */
   const $backTop = $('<button id="backToTop" title="Back to top">↑</button>').css({
     position: 'fixed',
     bottom: '28px',
@@ -477,9 +397,6 @@ $(function () {
   });
 
 
-  /* ══════════════════════════════════════
-     24. RESULTS SECTION — EXPAND/COLLAPSE
-  ══════════════════════════════════════ */
   $(document).on('click', '.src-header', function (e) {
     // Only collapse if not clicking buttons/links inside header
     if ($(e.target).closest('.btn, a, button').length) return;
@@ -503,9 +420,6 @@ $(function () {
   $('.src-header').append('<span class="src-collapse-icon" style="margin-left:auto;color:#94A3B8;font-size:12px;cursor:pointer">▲</span>');
 
 
-  /* ══════════════════════════════════════
-     25. BADGE ANIMATION ON HOVER
-  ══════════════════════════════════════ */
   $(document).on('mouseenter', '.badge', function () {
     $(this).css({ transform: 'scale(1.08)', transition: 'transform 0.15s ease' });
   }).on('mouseleave', '.badge', function () {
@@ -513,10 +427,7 @@ $(function () {
   });
 
 });
-/* End of ResultMS premium JS */
-/* ══════════════════════════════════════
-   FIX — Mobile sidebar with overlay
-══════════════════════════════════════ */
+
 $(function () {
   // Add overlay div to body if not present
   if (!$('#sidebarOverlay').length) {
