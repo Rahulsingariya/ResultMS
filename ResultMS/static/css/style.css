@@ -1,14 +1,3 @@
-/* ═══════════════════════════════════════════════════════════════════
-   RESULT MANAGEMENT SYSTEM — Premium UI v2.0
-   Bootstrap 5 Enhanced | Glassmorphism | Micro-animations
-   1200+ lines of production-grade CSS
-═══════════════════════════════════════════════════════════════════ */
-
-/* ─── Google Fonts are loaded in base.html ─── */
-
-/* ══════════════════════════════════════════
-   1. CSS CUSTOM PROPERTIES (Design Tokens)
-══════════════════════════════════════════ */
 :root {
   /* Layout */
   --sidebar-w:      260px;

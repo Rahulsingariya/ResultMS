@@ -1,13 +1,7 @@
-/* ═══════════════════════════════════════════════════════════════
-   RESULT MANAGEMENT SYSTEM — Premium JS v2.0
-   jQuery Enhanced | Animations | Micro-interactions
-═══════════════════════════════════════════════════════════════ */
+
 
 $(function () {
 
-  /* ══════════════════════════════════════
-     1. LIVE CLOCK
-  ══════════════════════════════════════ */
   function updateClock() {
     const now  = new Date();
     const opts = {
@@ -20,9 +14,6 @@ $(function () {
   setInterval(updateClock, 30000);
 
 
-  /* ══════════════════════════════════════
-     2. SIDEBAR TOGGLE
-  ══════════════════════════════════════ */
   $('#menuToggle').on('click', function () {
     $('#sidebar').toggleClass('open');
     $('body').toggleClass('sidebar-open');

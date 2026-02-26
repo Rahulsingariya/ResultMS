@@ -4,9 +4,11 @@ from flask import render_template, request, redirect, url_for, flash, jsonify, s
 from database import get_connection
 from helpers import calculate_grade, get_result_summary, get_grade_color
 
-
-def hash_password(pw):
-    return hashlib.sha256(pw.encode("utf-8")).hexdigest()
+# ─────────────────────────────────────────────
+# ADMIN CREDENTIALS — change these as you like
+# ─────────────────────────────────────────────
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "admin123"   # ← change this to your own password
 
 
 def login_required(f):
@@ -22,7 +24,7 @@ def login_required(f):
 def register_routes(app):
 
     # ─────────────────────────────────────────────
-    # AUTH
+    # AUTH — Login / Logout only
     # ─────────────────────────────────────────────
 
     @app.route("/login", methods=["GET", "POST"])
@@ -38,81 +40,27 @@ def register_routes(app):
                 flash("Username and password are required.", "error")
                 return render_template("login.html")
 
-            conn = get_connection()
-            user = conn.execute(
-                "SELECT * FROM users WHERE username = ?", (username,)
-            ).fetchone()
-            conn.close()
-
-            if user is None:
-                flash("No account found with that username.", "error")
-                return render_template("login.html")
-
-            if user["password"] == hash_password(password):
-                session["user_id"]  = user["id"]
-                session["username"] = user["username"]
-                session["fullname"] = user["fullname"]
-                flash(f"Welcome back, {user['fullname']}!", "success")
+            if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+                session["user_id"]  = 1
+                session["username"] = ADMIN_USERNAME
+                session["fullname"] = "Administrator"
+                flash("Welcome back, Administrator!", "success")
                 return redirect(url_for("dashboard"))
             else:
-                flash("Incorrect password. Please try again.", "error")
+                flash("Incorrect username or password.", "error")
                 return render_template("login.html")
 
         return render_template("login.html")
 
-    @app.route("/signup", methods=["GET", "POST"])
-    def signup():
-        if "user_id" in session:
-            return redirect(url_for("dashboard"))
-
-        if request.method == "POST":
-            fullname         = request.form.get("fullname", "").strip()
-            username         = request.form.get("username", "").strip()
-            password         = request.form.get("password", "").strip()
-            confirm_password = request.form.get("confirm_password", "").strip()
-
-            if not all([fullname, username, password, confirm_password]):
-                flash("All fields are required.", "error")
-                return render_template("signup.html")
-
-            if len(password) < 6:
-                flash("Password must be at least 6 characters.", "error")
-                return render_template("signup.html")
-
-            if password != confirm_password:
-                flash("Passwords do not match.", "error")
-                return render_template("signup.html")
-
-            conn = get_connection()
-            existing = conn.execute(
-                "SELECT id FROM users WHERE username = ?", (username,)
-            ).fetchone()
-
-            if existing:
-                conn.close()
-                flash("Username already taken. Please choose another.", "error")
-                return render_template("signup.html")
-
-            try:
-                conn.execute(
-                    "INSERT INTO users (fullname, username, password) VALUES (?,?,?)",
-                    (fullname, username, hash_password(password))
-                )
-                conn.commit()
-                flash("Account created successfully! Please login.", "success")
-                return redirect(url_for("login"))
-            except Exception as e:
-                flash(f"Error: {e}", "error")
-                return render_template("signup.html")
-            finally:
-                conn.close()
-
-        return render_template("signup.html")
-
     @app.route("/logout")
     def logout():
         session.clear()
-        flash("You have been logged out successfully.", "success")
+        flash("You have been logged out.", "success")
+        return redirect(url_for("login"))
+
+    # Redirect signup to login — no public registration
+    @app.route("/signup")
+    def signup():
         return redirect(url_for("login"))
 
     # ─────────────────────────────────────────────

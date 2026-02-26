@@ -9,7 +9,6 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'Inter', sans-serif;
       background: #f5f7fa;
@@ -18,20 +17,17 @@
       align-items: center;
       justify-content: center;
     }
-
     .page-wrap {
       display: flex;
       width: 100%;
-      max-width: 900px;
-      min-height: 520px;
+      max-width: 860px;
+      min-height: 500px;
       background: #fff;
       border-radius: 16px;
       box-shadow: 0 4px 32px rgba(0,0,0,0.10);
       overflow: hidden;
       margin: 24px;
     }
-
-    /* Left panel */
     .left-panel {
       flex: 1;
       background: linear-gradient(145deg, #1e3a5f, #2d6a9f);
@@ -42,46 +38,14 @@
       padding: 48px 36px;
       color: #fff;
     }
-    .left-panel .brand-icon {
-      font-size: 52px;
-      margin-bottom: 20px;
-    }
-    .left-panel h1 {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      letter-spacing: -0.5px;
-    }
+    .left-panel .brand-icon { font-size: 52px; margin-bottom: 20px; }
+    .left-panel h1 { font-size: 26px; font-weight: 700; margin-bottom: 10px; }
     .left-panel h1 span { color: #7dd3fc; }
-    .left-panel p {
-      font-size: 14px;
-      opacity: 0.75;
-      text-align: center;
-      line-height: 1.6;
-      max-width: 220px;
-    }
-    .left-panel .features {
-      margin-top: 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: 100%;
-    }
-    .left-panel .feature-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      opacity: 0.85;
-    }
-    .left-panel .feature-item i {
-      background: rgba(255,255,255,0.15);
-      border-radius: 6px;
-      padding: 5px;
-      font-size: 14px;
-    }
+    .left-panel p { font-size: 14px; opacity: 0.75; text-align: center; line-height: 1.6; max-width: 220px; }
+    .left-panel .features { margin-top: 32px; display: flex; flex-direction: column; gap: 12px; width: 100%; }
+    .left-panel .feature-item { display: flex; align-items: center; gap: 10px; font-size: 13px; opacity: 0.85; }
+    .left-panel .feature-item i { background: rgba(255,255,255,0.15); border-radius: 6px; padding: 5px; font-size: 14px; }
 
-    /* Right panel */
     .right-panel {
       flex: 1;
       padding: 48px 44px;
@@ -89,121 +53,49 @@
       flex-direction: column;
       justify-content: center;
     }
-    .right-panel h2 {
-      font-size: 22px;
-      font-weight: 700;
-      color: #111827;
-      margin-bottom: 6px;
-    }
-    .right-panel .subtitle {
-      font-size: 13.5px;
-      color: #6b7280;
-      margin-bottom: 28px;
-    }
+    .right-panel h2 { font-size: 22px; font-weight: 700; color: #111827; margin-bottom: 6px; }
+    .right-panel .subtitle { font-size: 13.5px; color: #6b7280; margin-bottom: 28px; }
 
-    /* Flash */
-    .alert {
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13.5px;
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .alert { padding: 10px 14px; border-radius: 8px; font-size: 13.5px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
     .alert-error   { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
     .alert-success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
 
-    /* Form */
     .form-group { margin-bottom: 18px; }
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      font-weight: 500;
-      color: #374151;
-      margin-bottom: 6px;
-    }
-    .input-wrap {
-      position: relative;
-    }
-    .input-wrap i.icon {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #9ca3af;
-      font-size: 15px;
-    }
+    .form-group label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+    .input-wrap { position: relative; }
+    .input-wrap i.icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 15px; }
     .input-wrap input {
-      width: 100%;
-      padding: 10px 12px 10px 36px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 8px;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      color: #111827;
-      background: #fff;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%; padding: 10px 12px 10px 36px;
+      border: 1.5px solid #e5e7eb; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 14px; color: #111827;
+      background: #fff; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .input-wrap input:focus {
-      border-color: #2d6a9f;
-      box-shadow: 0 0 0 3px rgba(45,106,159,0.10);
-    }
+    .input-wrap input:focus { border-color: #2d6a9f; box-shadow: 0 0 0 3px rgba(45,106,159,0.10); }
     .input-wrap .toggle-pw {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: #9ca3af;
-      cursor: pointer;
-      font-size: 15px;
-      padding: 0;
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 15px; padding: 0;
     }
     .input-wrap .toggle-pw:hover { color: #2d6a9f; }
 
     .btn-primary {
-      width: 100%;
-      padding: 11px;
-      background: #1e3a5f;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      margin-top: 6px;
+      width: 100%; padding: 11px;
+      background: #1e3a5f; color: #fff; border: none; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: background 0.2s; margin-top: 6px;
     }
-    .btn-primary:hover  { background: #2d6a9f; }
+    .btn-primary:hover { background: #2d6a9f; }
     .btn-primary:active { transform: scale(0.99); }
 
-    .divider {
+    .admin-note {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 12.5px;
+      color: #9ca3af;
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin: 20px 0;
-      color: #d1d5db;
-      font-size: 12px;
+      justify-content: center;
+      gap: 5px;
     }
-    .divider::before, .divider::after {
-      content: ''; flex: 1; height: 1px; background: #e5e7eb;
-    }
-
-    .switch-text {
-      text-align: center;
-      font-size: 13.5px;
-      color: #6b7280;
-    }
-    .switch-text a {
-      color: #2d6a9f;
-      font-weight: 600;
-      text-decoration: none;
-    }
-    .switch-text a:hover { text-decoration: underline; }
 
     @media (max-width: 640px) {
       .left-panel { display: none; }
@@ -212,7 +104,6 @@
   </style>
 </head>
 <body>
-
 <div class="page-wrap">
 
   <!-- Left Panel -->
@@ -221,24 +112,16 @@
     <h1>Result<span>MS</span></h1>
     <p>A complete result management system for schools and institutions.</p>
     <div class="features">
-      <div class="feature-item">
-        <i class="bi bi-people-fill"></i> Manage Students & Classes
-      </div>
-      <div class="feature-item">
-        <i class="bi bi-clipboard2-data-fill"></i> Enter & Track Results
-      </div>
-      <div class="feature-item">
-        <i class="bi bi-file-earmark-text-fill"></i> Generate Marksheets
-      </div>
-      <div class="feature-item">
-        <i class="bi bi-bar-chart-fill"></i> View Analytics
-      </div>
+      <div class="feature-item"><i class="bi bi-people-fill"></i> Manage Students & Classes</div>
+      <div class="feature-item"><i class="bi bi-clipboard2-data-fill"></i> Enter & Track Results</div>
+      <div class="feature-item"><i class="bi bi-file-earmark-text-fill"></i> Generate Marksheets</div>
+      <div class="feature-item"><i class="bi bi-bar-chart-fill"></i> View Analytics</div>
     </div>
   </div>
 
   <!-- Right Panel -->
   <div class="right-panel">
-    <h2>Sign in to your account</h2>
+    <h2>Admin Login</h2>
     <p class="subtitle">Enter your credentials to access the dashboard</p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -258,39 +141,32 @@
         <label>Username</label>
         <div class="input-wrap">
           <i class="bi bi-person icon"></i>
-          <input type="text" name="username" placeholder="Enter your username" required autocomplete="username"/>
+          <input type="text" name="username" placeholder="Enter username" required autocomplete="username"/>
         </div>
       </div>
-
       <div class="form-group">
         <label>Password</label>
         <div class="input-wrap">
           <i class="bi bi-lock icon"></i>
-          <input type="password" name="password" id="loginPw" placeholder="Enter your password" required autocomplete="current-password"/>
-          <button type="button" class="toggle-pw" onclick="togglePw('loginPw',this)">
-            <i class="bi bi-eye"></i>
+          <input type="password" name="password" id="pw" placeholder="Enter password" required autocomplete="current-password"/>
+          <button type="button" class="toggle-pw" onclick="togglePw()">
+            <i class="bi bi-eye" id="eyeIcon"></i>
           </button>
         </div>
       </div>
-
-      <button type="submit" class="btn-primary">
-        Sign In &nbsp;→
-      </button>
+      <button type="submit" class="btn-primary">Sign In &nbsp;→</button>
     </form>
 
-    <div class="divider">or</div>
-
-    <div class="switch-text">
-      Don't have an account? <a href="{{ url_for('signup') }}">Create one</a>
+    <div class="admin-note">
+      <i class="bi bi-shield-lock"></i> Restricted to authorized administrators only
     </div>
   </div>
 
 </div>
-
 <script>
-  function togglePw(id, btn) {
-    const inp  = document.getElementById(id);
-    const icon = btn.querySelector('i');
+  function togglePw() {
+    const inp  = document.getElementById('pw');
+    const icon = document.getElementById('eyeIcon');
     if (inp.type === 'password') { inp.type = 'text'; icon.className = 'bi bi-eye-slash'; }
     else { inp.type = 'password'; icon.className = 'bi bi-eye'; }
   }
