@@ -1,7 +1,13 @@
-
+/* ═══════════════════════════════════════════════════════════════
+   RESULT MANAGEMENT SYSTEM — Premium JS v2.0
+   jQuery Enhanced | Animations | Micro-interactions
+═══════════════════════════════════════════════════════════════ */
 
 $(function () {
 
+  /* ══════════════════════════════════════
+     1. LIVE CLOCK
+  ══════════════════════════════════════ */
   function updateClock() {
     const now  = new Date();
     const opts = {
@@ -14,22 +20,23 @@ $(function () {
   setInterval(updateClock, 30000);
 
 
+  /* ══════════════════════════════════════
+     2. SIDEBAR TOGGLE (with overlay)
+  ══════════════════════════════════════ */
+  if (!$('#sidebarOverlay').length) {
+    $('body').append('<div id="sidebarOverlay" class="sidebar-overlay"></div>');
+  }
+
   $('#menuToggle').on('click', function () {
     $('#sidebar').toggleClass('open');
-    $('body').toggleClass('sidebar-open');
+    $('#sidebarOverlay').toggleClass('active');
   });
 
-  // Overlay click closes sidebar on mobile
-  $(document).on('click', function (e) {
-    if ($(window).width() <= 768) {
-      if (!$(e.target).closest('#sidebar, #menuToggle').length) {
-        $('#sidebar').removeClass('open');
-        $('body').removeClass('sidebar-open');
-      }
-    }
+  $('#sidebarOverlay').on('click', function () {
+    $('#sidebar').removeClass('open');
+    $('#sidebarOverlay').removeClass('active');
   });
 
-  // Sidebar link active state feedback
   $('.nav-item').on('click', function () {
     $(this).addClass('nav-item--clicking');
     setTimeout(() => $(this).removeClass('nav-item--clicking'), 300);
@@ -63,16 +70,11 @@ $(function () {
     $({ count: 0 }).animate({ count: target }, {
       duration: 1000,
       easing: 'swing',
-      step: function () {
-        $el.text(Math.floor(this.count));
-      },
-      complete: function () {
-        $el.text(target);
-      }
+      step: function () { $el.text(Math.floor(this.count)); },
+      complete: function () { $el.text(target); }
     });
   }
 
-  // Trigger counter when stat cards come into view
   const counterObserver = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       if (entry.isIntersecting) {
@@ -104,7 +106,6 @@ $(function () {
   }, { threshold: 0.2 });
 
   $('.class-dist').each(function () {
-    // Store original widths and reset
     $(this).find('.dist-bar').each(function () {
       const w = $(this).css('width');
       $(this).data('width', parseFloat(w)).css('width', '0');
@@ -135,7 +136,7 @@ $(function () {
 
 
   /* ══════════════════════════════════════
-     7. TABLE ROW HOVER ENHANCEMENT
+     7. TABLE ROW HOVER
   ══════════════════════════════════════ */
   $(document).on('mouseenter', '.table tbody tr', function () {
     $(this).find('td:first-child').css('border-left', '3px solid #6366F1');
@@ -151,14 +152,11 @@ $(function () {
     const $btn = $(this);
     const orig = $btn.html();
     $btn.data('original', orig);
-
     setTimeout(function () {
       if ($btn.closest('form').find('.marks-input.invalid').length === 0) {
         $btn.html('<span class="btn-spinner"></span> Saving…').prop('disabled', true).addClass('loading');
       }
     }, 50);
-
-    // Re-enable after 8s as safety net
     setTimeout(function () {
       $btn.html(orig).prop('disabled', false).removeClass('loading');
     }, 8000);
@@ -166,7 +164,7 @@ $(function () {
 
 
   /* ══════════════════════════════════════
-     9. FORM FIELD FOCUS EFFECTS
+     9. FORM FIELD FOCUS
   ══════════════════════════════════════ */
   $(document).on('focus', '.form-input, .marks-input', function () {
     $(this).closest('.form-group').addClass('form-group--focused');
@@ -176,47 +174,32 @@ $(function () {
 
 
   /* ══════════════════════════════════════
-     10. CONFIRMATION DIALOGS (ENHANCED)
+     10. CONFIRMATION DIALOGS
   ══════════════════════════════════════ */
   $(document).on('submit', 'form[data-confirm]', function (e) {
     const msg = $(this).data('confirm') || 'Are you sure?';
-    if (!confirm(msg)) {
-      e.preventDefault();
-    }
+    if (!confirm(msg)) { e.preventDefault(); }
   });
 
 
   /* ══════════════════════════════════════
-     11. SEARCH INPUT CLEAR BUTTON
+     11. SEARCH CLEAR BUTTON
   ══════════════════════════════════════ */
   $('.search-input').each(function () {
     const $input = $(this);
-    if ($input.val().length > 0) {
-      addClearBtn($input);
-    }
+    if ($input.val().length > 0) { addClearBtn($input); }
     $input.on('input', function () {
-      if ($(this).val().length > 0) {
-        addClearBtn($(this));
-      } else {
-        $(this).siblings('.search-clear').remove();
-      }
+      if ($(this).val().length > 0) { addClearBtn($(this)); }
+      else { $(this).siblings('.search-clear').remove(); }
     });
   });
 
   function addClearBtn($input) {
     if ($input.siblings('.search-clear').length) return;
     const $clear = $('<button type="button" class="search-clear" title="Clear">✕</button>').css({
-      position: 'absolute',
-      right: '10px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      background: 'none',
-      border: 'none',
-      color: '#94A3B8',
-      cursor: 'pointer',
-      fontSize: '12px',
-      padding: '2px 4px',
-      lineHeight: '1'
+      position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+      background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer',
+      fontSize: '12px', padding: '2px 4px', lineHeight: '1'
     });
     $input.wrap('<div style="position:relative;flex:1;min-width:240px"></div>');
     $input.css('padding-right', '30px').after($clear);
@@ -228,7 +211,7 @@ $(function () {
 
 
   /* ══════════════════════════════════════
-     12. TOOLTIP INIT (Bootstrap)
+     12. TOOLTIP INIT
   ══════════════════════════════════════ */
   if (typeof bootstrap !== 'undefined') {
     const tooltipEls = document.querySelectorAll('[data-bs-toggle="tooltip"]');
@@ -237,38 +220,25 @@ $(function () {
 
 
   /* ══════════════════════════════════════
-     13. GRADE PILL HOVER POPOVER
+     13. GRADE PILL TOOLTIP
   ══════════════════════════════════════ */
   const gradeDesc = {
-    'A+': '90–100% · Outstanding',
-    'A':  '80–89% · Excellent',
-    'B+': '70–79% · Very Good',
-    'B':  '60–69% · Good',
-    'C+': '50–59% · Above Average',
-    'C':  '40–49% · Average',
-    'D':  '33–39% · Pass',
-    'F':  'Below 33% · Fail'
+    'A+': '90–100% · Outstanding', 'A':  '80–89% · Excellent',
+    'B+': '70–79% · Very Good',    'B':  '60–69% · Good',
+    'C+': '50–59% · Above Average','C':  '40–49% · Average',
+    'D':  '33–39% · Pass',         'F':  'Below 33% · Fail'
   };
 
   $(document).on('mouseenter', '.grade-pill', function () {
     const grade = $(this).text().trim();
     const desc  = gradeDesc[grade];
     if (!desc) return;
-
     const $tip = $('<div class="grade-tooltip">' + desc + '</div>').css({
-      position: 'absolute',
-      background: '#1E293B',
-      color: 'white',
-      fontSize: '11px',
-      fontWeight: '500',
-      padding: '5px 10px',
-      borderRadius: '6px',
-      whiteSpace: 'nowrap',
-      zIndex: 9999,
-      pointerEvents: 'none',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+      position: 'absolute', background: '#1E293B', color: 'white',
+      fontSize: '11px', fontWeight: '500', padding: '5px 10px',
+      borderRadius: '6px', whiteSpace: 'nowrap', zIndex: 9999,
+      pointerEvents: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
     });
-
     $('body').append($tip);
     const pos = $(this).offset();
     $tip.css({ top: pos.top - $tip.outerHeight() - 6, left: pos.left });
@@ -294,9 +264,7 @@ $(function () {
      15. SCROLL TO FLASH
   ══════════════════════════════════════ */
   if ($('.flash-wrap .flash').length) {
-    $('html, body').animate({
-      scrollTop: $('.flash-wrap').offset().top - 80
-    }, 400);
+    $('html, body').animate({ scrollTop: $('.flash-wrap').offset().top - 80 }, 400);
   }
 
 
@@ -313,10 +281,10 @@ $(function () {
 
 
   /* ══════════════════════════════════════
-     17. TABLE SORT INDICATOR
+     17. TABLE SORT
   ══════════════════════════════════════ */
   $('.table th[data-sort]').css('cursor', 'pointer').on('click', function () {
-    const col = $(this).data('sort');
+    const col    = $(this).data('sort');
     const $table = $(this).closest('table');
     const $tbody = $table.find('tbody');
     const rows   = $tbody.find('tr').toArray();
@@ -327,10 +295,7 @@ $(function () {
       const bVal = $(b).find('td').eq(col).text().trim();
       const aNum = parseFloat(aVal);
       const bNum = parseFloat(bVal);
-
-      if (!isNaN(aNum) && !isNaN(bNum)) {
-        return asc ? aNum - bNum : bNum - aNum;
-      }
+      if (!isNaN(aNum) && !isNaN(bNum)) return asc ? aNum - bNum : bNum - aNum;
       return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
     });
 
@@ -346,46 +311,37 @@ $(function () {
   $('a.nav-item').on('click', function (e) {
     const href = $(this).attr('href');
     if (!href || href === '#' || href.startsWith('javascript')) return;
-
     e.preventDefault();
     $('body').css({ opacity: '1', transition: 'opacity 0.2s ease' })
-             .animate({ opacity: 0 }, 200, function () {
-               window.location.href = href;
-             });
+             .animate({ opacity: 0 }, 200, function () { window.location.href = href; });
   });
 
-  // Fade in on load
   $('body').css('opacity', '0').animate({ opacity: 1 }, 300);
 
 
   /* ══════════════════════════════════════
-     19. INPUT RIPPLE EFFECT
+     19. MARKS INPUT HIGHLIGHT
   ══════════════════════════════════════ */
   $(document).on('focus', '.marks-input', function () {
-    $(this).closest('tr').css({
-      background: 'linear-gradient(90deg, #F0F4FF, #FAFCFF)',
-      transition: 'background 0.3s ease'
-    });
+    $(this).closest('tr').css({ background: 'linear-gradient(90deg, #F0F4FF, #FAFCFF)', transition: 'background 0.3s ease' });
   }).on('blur', '.marks-input', function () {
     $(this).closest('tr').css('background', '');
   });
 
 
   /* ══════════════════════════════════════
-     20. KEYBOARD SHORTCUT — Ctrl+Enter to submit
+     20. CTRL+ENTER TO SUBMIT
   ══════════════════════════════════════ */
   $(document).on('keydown', function (e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       const $form = $('form#resultForm');
-      if ($form.length) {
-        $form.submit();
-      }
+      if ($form.length) { $form.submit(); }
     }
   });
 
 
   /* ══════════════════════════════════════
-     21. SIDEBAR ACTIVE LINK HIGHLIGHT
+     21. SIDEBAR ACTIVE LINK
   ══════════════════════════════════════ */
   const currentPath = window.location.pathname;
   $('.nav-item').each(function () {
@@ -399,7 +355,7 @@ $(function () {
 
 
   /* ══════════════════════════════════════
-     22. MARK TABLE PROGRESS BARS
+     22. MARKSHEET PROGRESS BARS
   ══════════════════════════════════════ */
   $('.ms-table tbody tr').each(function () {
     const $cells = $(this).find('td');
@@ -420,42 +376,29 @@ $(function () {
     }
   });
 
-  // Animate those bars
   setTimeout(function () {
-    $('[data-w]').each(function () {
-      $(this).css('width', $(this).data('w') + '%');
-    });
+    $('[data-w]').each(function () { $(this).css('width', $(this).data('w') + '%'); });
   }, 400);
 
 
   /* ══════════════════════════════════════
-     23. BACK TO TOP BUTTON
+     23. BACK TO TOP
   ══════════════════════════════════════ */
   const $backTop = $('<button id="backToTop" title="Back to top">↑</button>').css({
-    position: 'fixed',
-    bottom: '28px',
-    right: '28px',
-    width: '40px',
-    height: '40px',
+    position: 'fixed', bottom: '28px', right: '28px',
+    width: '40px', height: '40px',
     background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '50%',
-    fontSize: '18px',
-    fontWeight: '700',
-    cursor: 'pointer',
+    color: 'white', border: 'none', borderRadius: '50%',
+    fontSize: '18px', fontWeight: '700', cursor: 'pointer',
     boxShadow: '0 4px 16px rgba(79,70,229,0.4)',
-    opacity: '0',
-    transform: 'scale(0)',
+    opacity: '0', transform: 'scale(0)',
     transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
-    zIndex: '500',
-    lineHeight: '40px',
-    textAlign: 'center'
+    zIndex: '500', lineHeight: '40px', textAlign: 'center'
   });
 
   $('body').append($backTop);
 
-  $(window).on('scroll', function () {
+  $(window).on('scroll.backTop', function () {
     if ($(this).scrollTop() > 300) {
       $backTop.css({ opacity: '1', transform: 'scale(1)' });
     } else {
@@ -469,33 +412,25 @@ $(function () {
 
 
   /* ══════════════════════════════════════
-     24. RESULTS SECTION — EXPAND/COLLAPSE
+     24. RESULTS COLLAPSE
   ══════════════════════════════════════ */
   $(document).on('click', '.src-header', function (e) {
-    // Only collapse if not clicking buttons/links inside header
     if ($(e.target).closest('.btn, a, button').length) return;
-
-    const $card    = $(this).closest('.student-result-card');
-    const $body    = $card.find('.table-wrap');
-    const $toggle  = $card.find('.src-collapse-icon');
-
+    const $card   = $(this).closest('.student-result-card');
+    const $body   = $card.find('.table-wrap');
+    const $toggle = $card.find('.src-collapse-icon');
     if ($body.is(':visible')) {
-      $body.slideUp(250);
-      $toggle.text('▼');
-      $card.css('opacity', '0.75');
+      $body.slideUp(250); $toggle.text('▼'); $card.css('opacity', '0.75');
     } else {
-      $body.slideDown(250);
-      $toggle.text('▲');
-      $card.css('opacity', '1');
+      $body.slideDown(250); $toggle.text('▲'); $card.css('opacity', '1');
     }
   });
 
-  // Add collapse icon to each src-header
   $('.src-header').append('<span class="src-collapse-icon" style="margin-left:auto;color:#94A3B8;font-size:12px;cursor:pointer">▲</span>');
 
 
   /* ══════════════════════════════════════
-     25. BADGE ANIMATION ON HOVER
+     25. BADGE HOVER
   ══════════════════════════════════════ */
   $(document).on('mouseenter', '.badge', function () {
     $(this).css({ transform: 'scale(1.08)', transition: 'transform 0.15s ease' });
@@ -503,24 +438,4 @@ $(function () {
     $(this).css('transform', '');
   });
 
-});
-/* End of ResultMS premium JS */
-/* ══════════════════════════════════════
-   FIX — Mobile sidebar with overlay
-══════════════════════════════════════ */
-$(function () {
-  // Add overlay div to body if not present
-  if (!$('#sidebarOverlay').length) {
-    $('body').append('<div id="sidebarOverlay" class="sidebar-overlay"></div>');
-  }
-
-  $('#menuToggle').off('click').on('click', function () {
-    $('#sidebar').toggleClass('open');
-    $('#sidebarOverlay').toggleClass('active');
-  });
-
-  $('#sidebarOverlay').on('click', function () {
-    $('#sidebar').removeClass('open');
-    $('#sidebarOverlay').removeClass('active');
-  });
 });
